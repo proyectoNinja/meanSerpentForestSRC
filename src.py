@@ -14,7 +14,7 @@ def clasificaPorHora(hora,hMin):
             clasificado=True
         else:
             grupo=grupo+1
-        return grupo
+    return grupo
 
 #print "Leyendo archivo..."
 #columnas=['Hora','Tipo','Historico','Leida']
