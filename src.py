@@ -8,7 +8,7 @@ def clasificaPorHora(hora,hMin):
     hRef=datetime.strptime(hMin,format)
     grupo=0
     clasificado=False
-    while(grupo<90 and not clasificado):
+    while(grupo<89 and not clasificado):
         horas=4*(grupo+1)
         if(hRef+timedelta(hours=horas)>hClasificar):
             clasificado=True
