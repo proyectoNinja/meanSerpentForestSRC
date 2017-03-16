@@ -1,0 +1,13 @@
+diferencia entre clasificaion y regresion:
+http://ingenierobeta.com/clasificacion-vs-regresion-machine-learning/
+
+RandomForest:
+  ¿Que son?:
+  http://wwwae.ciemat.es/~cardenas/docs/lessons/RandomForest.pdf
+
+  ¿Como se usan?:
+  https://rstudio-pubs-static.s3.amazonaws.com/255596_bc711edfce4d485c8fdc679eb5b60229.html#ejemplo-regresion-1
+  http://scikit-learn.org/stable/modules/classes.html#module-sklearn.ensemble
+
+cross_validation:
+http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html

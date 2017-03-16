@@ -1,0 +1,45 @@
+"""
+alg = RandomForestClassifier(random_state=1, n_estimators=50, min_samples_split=8, min_samples_leaf=4)
+# Compute the accuracy score for all the cross-validation folds; this is much simpler than what we did before
+scores = cross_validation.cross_val_score(alg, data[predictors], data["Historico"], cv=3)
+
+# Take the mean of the scores (because we have one for each fold)
+print(scores.mean())
+
+#output
+columnas=['Hora']
+output=pd.read_csv('../out.csv',header = 0, usecols=[0,1],names=columnas,parse_dates=True)
+output['Grupo']=output['Hora'].map(lambda x: clasificaPorHora(x,"2016/03/30 16:30"))
+output["date"]=output['Hora'].map(lambda x: pd.to_datetime(x,format=format, errors='ignore'))
+output=output.drop('Hora',axis=1)
+#output.groupby(by="Grupo").mean
+#predicciones
+train_data= data.values
+test_data= output.values
+predictors=["date","Tipo","Grupo"]
+target=["Historico"]
+# Initialize our algorithm class
+alg = RandomForestClassifier(random_state=1, n_estimators=390, min_samples_split=16, min_samples_leaf=4)
+# We set random_state to ensure we get the same splits every time we run this.
+kf = KFold(data.shape[0], n_folds=3, random_state=1)
+predictions = []
+for train, test in kf:
+    # The predictors we're using the train the algorithm.  Note how we only take the rows in the train folds.
+    train_predictors = (data[predictors].iloc[train,:])
+    # The target we're using to train the algorithm.
+    train_target = data["Historico"].iloc[train]
+    # Training the algorithm using the predictors and target.
+    alg.fit(train_predictors, train_target)
+    # We can now make predictions on the test fold
+    test_predictions = alg.predict(data[predictors].iloc[test,:])
+    predictions.append(test_predictions)
+predictions = np.concatenate(predictions, axis=0)
+print('imprimimos salida')
+# submission--toCSV
+submission = pandas.DataFrame({
+        "date": output["date"],
+        "Tipo": output["Tipo"],
+        "Historico": predictions
+    })
+submission.to_csv("../put_out.csv", index = False)
+"""
