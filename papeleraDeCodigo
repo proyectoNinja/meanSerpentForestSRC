@@ -1,4 +1,26 @@
-"""
+
+
+
+print "Prediciendo..."
+o = alg.predict(output).astype(int)
+
+print('Imprimiendo...')
+submission = pd.DataFrame({
+        "date": output["date"],
+        "Historico": o
+    })
+submission.to_csv("output.csv", index = False)
+
+
+print "Preparando IA..."
+predictors=["date"]
+target=["Historico"]
+kf = KFold(data.shape[0], random_state=1)
+alg = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=2, min_samples_leaf=1)
+
+
+gkf = GroupKFold(n_splits=3)
+
 alg = RandomForestClassifier(random_state=1, n_estimators=50, min_samples_split=8, min_samples_leaf=4)
 # Compute the accuracy score for all the cross-validation folds; this is much simpler than what we did before
 scores = cross_validation.cross_val_score(alg, data[predictors], data["Historico"], cv=3)
@@ -42,4 +64,3 @@ submission = pandas.DataFrame({
         "Historico": predictions
     })
 submission.to_csv("../put_out.csv", index = False)
-"""

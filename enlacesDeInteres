@@ -1,3 +1,8 @@
+kmeans:
+https://www.datascience.com/blog/introduction-to-k-means-clustering-algorithm-learn-data-science-tutorials
+https://jarroba.com/k-means-python-scikit-learn-ejemplos/
+http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+
 diferencia entre clasificaion y regresion:
 http://ingenierobeta.com/clasificacion-vs-regresion-machine-learning/
 
@@ -6,8 +11,18 @@ RandomForest:
   http://wwwae.ciemat.es/~cardenas/docs/lessons/RandomForest.pdf
 
   ¿Como se usan?:
-  https://rstudio-pubs-static.s3.amazonaws.com/255596_bc711edfce4d485c8fdc679eb5b60229.html#ejemplo-regresion-1
   http://scikit-learn.org/stable/modules/classes.html#module-sklearn.ensemble
+  https://www.dataquest.io/mission/75/improving-your-submission/10/making-predictions-with-multiple-classifiers
 
 cross_validation:
 http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html
+
+groupby:
+https://jarroba.com/pandas-python-ejemplos-parte-ii-io-merge-groupby/
+http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.groupby.html
+http://pandas.pydata.org/pandas-docs/stable/groupby.html#iterating-through-groups
+    ploting:
+        http://pandas.pydata.org/pandas-docs/version/0.16.2/generated/pandas.core.groupby.DataFrameGroupBy.plot.html
+
+KFold:
+http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.htm
