@@ -3,12 +3,28 @@ import numpy as np
 import time
 from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
 """
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GroupKFold
 from sklearn.cross_validation import KFold
-from sklearn.cluster import KMeans as modulador
 """
+
+def filtro(data,tipo):
+    if (tipo==0):
+        historico=data.drop('Leida',axis=1)
+        historico=historico.drop('Tipo',axis=1)
+        historico=historico.dropna(axis=0)
+        final=historico.reindex()
+        final.set_index('Hora', inplace=True)
+    elif (tipo==1):
+        leida=data.drop('Historico',axis=1)
+        leida=leida.drop('Tipo',axis=1)
+        leida=leida.dropna(axis=0)
+        final=leida.reindex()
+        final.set_index('Hora', inplace=True)
+    return final
 
 def clasificaPorHora(hora,hMin,format):
     hClasificar=datetime.strptime(hora,format)
@@ -23,36 +39,28 @@ def clasificaPorHora(hora,hMin,format):
             grupo=grupo+1
     return grupo
 
-print "Leyendo archivo..."
-columnas=['Hora','Tipo','Historico','Leida']
-data=pd.read_table('../csv.txt',header = 1, usecols=[1,2,3,4],names=columnas,parse_dates=True)
-
-print "Realizando adaptaciones pertinentes..."
-format="%Y/%m/%d %H:%M"
-data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,"2016/03/30 16:30",format))
-data["date"] =data['Hora'].map(lambda x: pd.to_datetime(x,format=format, errors='ignore'))
-data=data.drop('Hora', axis=1)
-data=data.drop('Leida',axis=1)
-
-historico=data.drop('Tipo',axis=1)
-historico=historico.dropna(axis=0)
-historico=historico.reindex()
-data_historico=historico.groupby('Grupo')
-
-print "Printing info..."
-data0=data_historico.get_group(0).drop('Grupo',axis=1)
-print data0
-
-print "Ploting..."
-data0.set_index('date', inplace=True)
-plt.plot(data0)
-plt.show()
-"""
-for i in range (90):
-    plt.plot(historico.get_group(i))
+def printAndPlotGroup(data,tipo,grupo):
+    imprimir=filtro(data.get_group(grupo),tipo)
+    imprimir=imprimir.drop('Grupo',axis=1)
+    print imprimir
+    imprimir.plot()
     plt.show()
 
-print "Preparando clusters"
-modulador().fit(historico)
-"""
+print "Leyendo archivo..."
+columnas=['Hora','Tipo','Historico','Leida']
+data=pd.read_table('../csv.txt',header = 1, usecols=[1,2,3,4],names=columnas,parse_dates='Hora')
+
+print "Realizando adaptaciones pertinentes..."
+print "Esto puede tardar unos segundos"
+format="%Y/%m/%d %H:%M"
+data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,"2016/03/30 16:30",format))
+data=filtro(data,0)
+data_agrupada=data.groupby('Grupo')
+for i in data_agrupada:
+    print i.drop
+#printAndPlotGroup(data_agrupada,0,22)
+asd=KMeans()
+asd.fit(data_agrupada)
+
+
 print "Todo ha salido a pedir de boca"
