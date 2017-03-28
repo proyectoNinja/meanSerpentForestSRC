@@ -46,6 +46,10 @@ def printAndPlotGroup(data,tipo,grupo):
     imprimir.plot()
     plt.show()
 
+def parser(dir):
+    columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV','Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
+    df=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],names=columnas,parse_dates='Hora')
+
 print "Leyendo archivo..."
 columnas=['Hora','Tipo','Historico','Leida']
 data=pd.read_table('../csv.txt',header = 1, usecols=[1,2,3,4],names=columnas,parse_dates='Hora')
@@ -54,8 +58,14 @@ print "Realizando adaptaciones pertinentes..."
 print "Esto puede tardar unos segundos"
 format="%Y/%m/%d %H:%M"
 data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,"2016/03/30 16:30",format))
+data=filtro(data,0)
 data_agrupada=data.groupby('Grupo')
-#printAndPlotGroup(data_agrupada,0,0)
+grupos=[]
+for index,grupo in data_agrupada:
+    grupo=grupo.drop('Grupo',axis=1)
+    grupos.append(grupo)
+#print grupos[3]
+cluster=KMeans()
 
 
 print "Todo ha salido a pedir de boca"

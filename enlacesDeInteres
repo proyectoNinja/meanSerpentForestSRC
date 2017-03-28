@@ -21,6 +21,7 @@ groupby:
 https://jarroba.com/pandas-python-ejemplos-parte-ii-io-merge-groupby/
 http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.groupby.html
 http://pandas.pydata.org/pandas-docs/stable/groupby.html#iterating-through-groups
+http://pandas.pydata.org/pandas-docs/stable/api.html#groupby
     ploting:
         http://pandas.pydata.org/pandas-docs/version/0.16.2/generated/pandas.core.groupby.DataFrameGroupBy.plot.html
 
