@@ -54,11 +54,8 @@ print "Realizando adaptaciones pertinentes..."
 print "Esto puede tardar unos segundos"
 format="%Y/%m/%d %H:%M"
 data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,"2016/03/30 16:30",format))
-#data=filtro(data,0)
 data_agrupada=data.groupby('Grupo')
-printAndPlotGroup(data_agrupada,0,0)
-#asd=KMeans()
-asd.fit(data_agrupada)
+#printAndPlotGroup(data_agrupada,0,0)
 
 
 print "Todo ha salido a pedir de boca"
