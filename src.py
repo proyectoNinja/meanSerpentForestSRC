@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import time
 from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
@@ -16,21 +17,29 @@ def filtro(data,tipo):
         col=['Historico','Hora','Grupo']
         data=data[col]
         data=data.dropna(axis=0)
-        data.set_index('Hora', inplace=True)
     elif (tipo==1):
         col=['Historico','Hora','Grupo']
         data=data[col]
         data=data.dropna(axis=0)
-        data.set_index('Hora', inplace=True)
-    elif (tipo==5):
-        col=['Carbohidratos','Hora','Grupo']
-        data=data[col]
-        data=data.dropna(axis=0)
-        data.set_index('Hora', inplace=True)
-    elif (tipo==4):
+    """
+    elif (tipo==5 or tipo==4):
+    #Carbohidratos
+        if (tipo==5):
+            col=['Carbohidratos','Hora','Grupo']
+            data=data[col]
+            data=data.dropna(axis=0)
+            data['Ingesta']=1
+        if (tipo==4):
+            if (data['Alimentos SV']):
+                print 6
+        #elif (tipo==4):
         #data['InsulinaTiempo']=Rapida/lenta 1/0
         #data['InsulinaCantidad']=Int/NaN
-        print 4
+    """
+    format="%Y/%m/%d %H:%M"
+    data['Indice']=data['Hora'].map(lambda hora: time.mktime(datetime.strptime(hora,format).timetuple()))
+    data=data.drop('Hora',axis=1)
+    data.set_index('Indice', inplace=True)
     return data
 
 def clasificaPorHora(hora,hMin,format):
@@ -61,7 +70,8 @@ def parser(dir):
     data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
     return data
 
-if (len(sys.argv)==2):
+
+if (len(sys.argv)>1):
     archivo=sys.argv[1]
 else:
     archivo="../csv.txt"
@@ -69,12 +79,8 @@ else:
 data=parser(archivo)
 data=filtro(data,0)
 data_agrupada=data.groupby('Grupo')
-grupos=[]
-for index,grupo in data_agrupada:
-    grupo=grupo.drop('Grupo',axis=1)
-    grupos.append(grupo)
-print grupos[66]
-grupos=np.array(grupos, dtype=object)
+print data_agrupada.get_group(0)
 cluster=KMeans()
-#cluster.fit(data)"""
+cluster.fit(data_agrupada)
+
 print "Todo ha salido a pedir de boca"

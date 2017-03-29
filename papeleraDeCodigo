@@ -20,6 +20,20 @@ alg = RandomForestClassifier(random_state=1, n_estimators=10, min_samples_split=
 
 
 
+"""CONVERTIR GROUPBY A ARRAY
+grupos=[]
+for index,grupo in data_agrupada:
+    grupo=grupo.drop('Grupo',axis=1)
+    grupos.append(grupo)
+print grupos[0]
+grupos=np.array(grupos, dtype=object)
+cluster=KMeans()
+#cluster.fit(data)
+"""
+
+
+
+
 """
 parser inicial
   columnas=['Hora','Tipo','Historico','Leida']
