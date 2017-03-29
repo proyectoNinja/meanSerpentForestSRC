@@ -6,10 +6,10 @@ from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-"""
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GroupKFold
-from sklearn.cross_validation import KFold
+"""imports RandomForest
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import GroupKFold
+    from sklearn.cross_validation import KFold
 """
 
 def filtro(data,tipo):
@@ -18,29 +18,37 @@ def filtro(data,tipo):
         data=data[col]
         data=data.dropna(axis=0)
     elif (tipo==1):
-        col=['Historico','Hora','Grupo']
+        col=['Leida','Hora','Grupo']
         data=data[col]
         data=data.dropna(axis=0)
-    """
-    elif (tipo==5 or tipo==4):
-    #Carbohidratos
-        if (tipo==5):
-            col=['Carbohidratos','Hora','Grupo']
-            data=data[col]
-            data=data.dropna(axis=0)
-            data['Ingesta']=1
-        if (tipo==4):
-            if (data['Alimentos SV']):
-                print 6
-        #elif (tipo==4):
-        #data['InsulinaTiempo']=Rapida/lenta 1/0
-        #data['InsulinaCantidad']=Int/NaN
+    """tipos 4 y 5
+        elif (tipo==4):#
+            data['Carbohidratos']=data['Alimentos SV'].map(lambda comida: estimador(comida,data))
+        elif (tipo==5 or tipo==4):
+        #Carbohidratos
+            if (tipo==5):
+                col=['Carbohidratos','Hora','Grupo']
+                data=data[col]
+                data=data.dropna(axis=0)
+                data['Ingesta']=1
+            if (tipo==4):
+                if (data['Alimentos SV']):
+                    print 6
+            #elif (tipo==4):
+            #data['InsulinaTiempo']=Rapida/lenta 1/0
+            #data['InsulinaCantidad']=Int/NaN
     """
     format="%Y/%m/%d %H:%M"
-    data['Indice']=data['Hora'].map(lambda hora: time.mktime(datetime.strptime(hora,format).timetuple()))
+    data['Indice']=data['Hora'].map(lambda hora: int(time.mktime(datetime.strptime(hora,format).timetuple())))
     data=data.drop('Hora',axis=1)
     data.set_index('Indice', inplace=True)
     return data
+
+def estimador(comida,data):
+    if (comida>0):
+        return data['Carbohidratos'].median()
+    else:
+        return 0
 
 def clasificaPorHora(hora,hMin,format):
     hClasificar=datetime.strptime(hora,format)
@@ -53,7 +61,7 @@ def clasificaPorHora(hora,hMin,format):
             clasificado=True
         else:
             grupo=grupo+1
-    return grupo
+    return int(grupo)
 
 def printAndPlotGroup(data,tipo,grupo):
     imprimir=filtro(data.get_group(grupo),tipo)
@@ -79,8 +87,14 @@ else:
 data=parser(archivo)
 data=filtro(data,0)
 data_agrupada=data.groupby('Grupo')
-print data_agrupada.get_group(0)
-cluster=KMeans()
-cluster.fit(data_agrupada)
-
+"""drop de 'grupo' y clustering
+    Esto deberia dropear la columa grupos pero no lo hace
+    for index,grupo in data_agrupada:
+        grupo=grupo.drop('Grupo',axis=1)
+        print index
+        print grupo
+    print data_agrupada.get_group(82)
+    cluster=KMeans()
+    cluster.fit(data_agrupada)
+"""
 print "Todo ha salido a pedir de boca"
