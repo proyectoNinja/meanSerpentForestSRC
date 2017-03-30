@@ -1,5 +1,23 @@
 
 
+def estimador(comida,data):
+    if (comida>0):
+        return data['Carbohidratos'].median()
+    else:
+        return 0
+
+
+"""drop de 'grupo' y clustering
+    Esto deberia dropear la columa grupos pero no lo hace
+    for index,grupo in data_agrupada:
+        grupo=grupo.drop('Grupo',axis=1)
+        print index
+        print grupo
+    print data_agrupada.get_group(82)
+    cluster=KMeans()
+    cluster.fit(data_agrupada)
+"""
+
 
 print "Prediciendo..."
 o = alg.predict(output).astype(int)
