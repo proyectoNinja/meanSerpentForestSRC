@@ -107,7 +107,9 @@ def procesado(data):
     for i,j in zip(clustering.labels_,data_agrupada):
         clusters[i].append(j)
     for i in range(_nClusters):
-        plt.plot(clusters[i])
+        for group in clusters[i]:
+            plt.plot(group)
+        plt.axis([])
         plt.show()
 
 
