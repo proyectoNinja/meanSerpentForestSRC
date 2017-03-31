@@ -1,7 +1,12 @@
 kmeans:
-https://www.datascience.com/blog/introduction-to-k-means-clustering-algorithm-learn-data-science-tutorials
 https://jarroba.com/k-means-python-scikit-learn-ejemplos/
 http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+  tutoriales y aprendizaje:
+        https://www.datacamp.com/community/tutorials/machine-learning-python#gs.i7kCesU
+        http://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_photo/py_table_of_contents_photo/py_table_of_contents_photo.html
+        http://scikit-learn.org/stable/tutorial/statistical_inference/unsupervised_learning.html#k-means-clustering
+        http://blog.mpacula.com/2011/04/27/k-means-clustering-example-python/
+        http://pendientedemigracion.ucm.es/info/socivmyt/paginas/D_departamento/materiales/analisis_datosyMultivariable/21conglk_SPSS.pdf
 
 diferencia entre clasificaion y regresion:
 http://ingenierobeta.com/clasificacion-vs-regresion-machine-learning/

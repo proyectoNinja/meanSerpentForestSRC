@@ -1,5 +1,14 @@
 
 
+
+"""imports RandomForest
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import GroupKFold
+    from sklearn.cross_validation import KFold
+"""
+
+
+
 def estimador(comida,data):
     if (comida>0):
         return data['Carbohidratos'].median()
