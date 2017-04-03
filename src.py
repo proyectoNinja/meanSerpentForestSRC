@@ -3,12 +3,19 @@ import numpy as np
 import sys
 import time
 import timeit
+import math
 from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 valorMinimo=8
 _nClusters=8
+nombreDatos= ['Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
+    'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
+    'Numero medio de eventos por debajo del minimo(60)',
+    'Numero medio de eventos por encima del maximo (240)',
+    'Maximo numero de eventos fuera de rango(60-240)',
+    'Minimo numero de eventos fuera de rango(60-240)']
 
 def filtro(data,tipo):
     if (tipo==0):
@@ -86,9 +93,7 @@ def cribador(data):
         elif(a>=valorMinimo and a<16):
             rowsNeeded=16-a
         grupo=grupo+1
-    #print data.describe()
     return data
-
 
 def procesado(data):
     data=cribador(data)
@@ -96,22 +101,67 @@ def procesado(data):
     data_agrupada=[]
     for index,grupo in data_final:
         data_agrupada.append(grupo['Historico'])
-        #data_tratable=data.drop(values=index,axis=0)
     clustering=KMeans(n_clusters=_nClusters)
     clustering.fit(data_agrupada)
-    #data['Cluster']=data.['grupo'].map(lambda x: clustering.labels_[x])
-
     clusters=[]
+    datos=[]
     for i in range(_nClusters):
         clusters.append([])
+        datos.append([])
+        for j in range(9):
+            datos[i].append([])
     for i,j in zip(clustering.labels_,data_agrupada):
         clusters[i].append(j)
     for i in range(_nClusters):
+        sumaDeMedias=0
+        sumaDeMaximos=0
+        sumaDeMinimos=0
+        sumaDeEventosBajos=0
+        sumaDeEventosAltos=0
+        nSegmentos=0
+        n=0
+        glucosaMinMedia=sys.maxint
+        glucosaMaxMedia=0
+        varianza=0
+        nVecesEnRango=0
+        nMinDeEventosMalos=16
+        sumaDeEventosMalosGrupo=0
         for group in clusters[i]:
+            sumaDeMedias+=group.mean()
+            sumaDeMaximos+=group.max()
+            sumaDeMinimos+=group.min()
+            nSegmentos+=1
+            nMaxDeEventosMalos=0
+            plt.subplot(2,4,i+1)
             plt.plot(group)
-        plt.axis([])
-        plt.show()
-
+            for registro in group:
+                varianza+=registro*registro
+                n+=1
+                if (registro>=70 and registro<=180):
+                    nVecesEnRango+=1
+                elif (registro<=60):
+                    sumaDeEventosBajos+=1
+                    sumaDeEventosMalosGrupo+=1
+                elif (registro>=240):
+                    sumaDeEventosAltos+=1
+                    sumaDeEventosMalosGrupo+=1
+            if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
+                nMaxDeEventosMalos=sumaDeEventosMalosGrupo
+            elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
+                nMinDeEventosMalos=sumaDeEventosMalosGrupo
+        varianza=varianza/n-(n+1*n+1)
+        datos[i][0]=sumaDeMedias/nSegmentos #media
+        datos[i][1]=math.sqrt(varianza) #Desviacion estandar
+        datos[i][2]=sumaDeMaximos/nSegmentos #media de maximos
+        datos[i][3]=sumaDeMinimos/nSegmentos #media de minimos
+        datos[i][4]=float(nVecesEnRango)/n*100 #% de tiempo en rango
+        datos[i][5]=float(sumaDeEventosBajos)/n #media de eventos bajos <60
+        datos[i][6]=float(sumaDeEventosAltos)/n #media de eventos altos >240
+        datos[i][7]=nMaxDeEventosMalos #maximo de eventos malos en un mismo segmento
+        datos[i][8]=nMinDeEventosMalos #minimo de eventos malos en un mismo segmento
+    for cluster in range(8):
+        print datos[cluster]
+    plt.show()
 
 def main():
     if (len(sys.argv)>1):

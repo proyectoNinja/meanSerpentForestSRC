@@ -7,6 +7,12 @@ http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
         http://scikit-learn.org/stable/tutorial/statistical_inference/unsupervised_learning.html#k-means-clustering
         http://blog.mpacula.com/2011/04/27/k-means-clustering-example-python/
         http://pendientedemigracion.ucm.es/info/socivmyt/paginas/D_departamento/materiales/analisis_datosyMultivariable/21conglk_SPSS.pdf
+  Selecting the number of clusters with silhouette analysis on KMeans clustering:
+        http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+
+plotting
+  http://matplotlib.org/api/pyplot_api.html
+  http://python-para-impacientes.blogspot.com.es/2014/08/graficos-en-ipython.html
 
 diferencia entre clasificaion y regresion:
 http://ingenierobeta.com/clasificacion-vs-regresion-machine-learning/
