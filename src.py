@@ -7,15 +7,17 @@ import math
 from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, calinski_harabaz_score, silhouette_samples
+
 
 valorMinimo=8
 _nClusters=8
-nombreDatos= ['Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
-    'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
-    'Numero medio de eventos por debajo del minimo(60)',
-    'Numero medio de eventos por encima del maximo (240)',
-    'Maximo numero de eventos fuera de rango(60-240)',
-    'Minimo numero de eventos fuera de rango(60-240)']
+nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
+                'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
+                'Numero medio de eventos por debajo del minimo(60)',
+                'Numero medio de eventos por encima del maximo (240)',
+                'Maximo numero de eventos fuera de rango(60-240)',
+                'Minimo numero de eventos fuera de rango(60-240)']
 
 def filtro(data,tipo):
     if (tipo==0):
@@ -69,38 +71,50 @@ def printAndPlotGroup(data,grupo):
     plt.show()
 
 def parser(dir):
-    start = timeit.timeit()
     columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV',
     'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
     data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],
     names=columnas,parse_dates='Hora')
     format="%Y/%m/%d %H:%M"
-    end = timeit.timeit()
-    print "tiempo neto de read"
-    print end - start
     primeraHora = data['Hora'].min()
     data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
-    print "tiempo neto de conversion"
-    print end - timeit.timeit()
     return data
 
 def cribador(data):
     contadorDeApariciones = data['Grupo'].value_counts(sort=False)
     grupo=0
-    for a in contadorDeApariciones:#esto es muy ineficiente
-        if (a!=16 or a<valorMinimo):
+    for a in contadorDeApariciones:
+        if (a!=16):
             data=data[data.Grupo!=grupo]
-        elif(a>=valorMinimo and a<16):
-            rowsNeeded=16-a
+            data.Grupo.map(lambda x: fun(x,grupo))
         grupo=grupo+1
     return data
+
+def fun(x,grupo):
+    a = False
+    if (x==grupo):
+        print grupo
+        a=True
+
+def eleccion(data):#  http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+    for n_clusters in range(_nClusters-1):
+        clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
+        cluster_labels = clusterer.fit_predict(data)
+        silhouette_avg = silhouette_score(data, cluster_labels)
+        cal_score = calinski_harabaz_score(data,cluster_labels)
+        print("For n_clusters =", n_clusters+2,
+              "The average silhouette_score is :", silhouette_avg,
+              ", the calinski_harabaz score is ", cal_score,)
 
 def procesado(data):
     data=cribador(data)
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     for index,grupo in data_final:
-        data_agrupada.append(grupo['Historico'])
+        if(len(grupo['Historico'])==16):
+            data_agrupada.append(grupo['Historico'])
+    #eleccion(data_agrupada)
+    #exit()
     clustering=KMeans(n_clusters=_nClusters)
     clustering.fit(data_agrupada)
     clusters=[]
