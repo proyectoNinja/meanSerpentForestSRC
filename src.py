@@ -46,8 +46,6 @@ def filtro(data,tipo):
             #data['InsulinaCantidad']=Int/NaN
     """
     format="%Y/%m/%d %H:%M"
-    #data['Indice']=data['Hora'].map(lambda hora: int(time.mktime(datetime.strptime(hora,format).timetuple())))
-    #data=data.drop('Hora',axis=1)
     data.set_index('Hora', inplace=True)
     return data
 
@@ -80,43 +78,28 @@ def parser(dir):
     data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
     return data
 
-def cribador(data):
-    contadorDeApariciones = data['Grupo'].value_counts(sort=False)
-    grupo=0
-    for a in contadorDeApariciones:
-        if (a!=16):
-            data=data[data.Grupo!=grupo]
-            data.Grupo.map(lambda x: fun(x,grupo))
-        grupo=grupo+1
-    return data
-
-def fun(x,grupo):
-    a = False
-    if (x==grupo):
-        print grupo
-        a=True
-
-def eleccion(data):#  http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+def eleccion(data_valores, data_trabajo):
     for n_clusters in range(_nClusters-1):
         clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
-        cluster_labels = clusterer.fit_predict(data)
-        silhouette_avg = silhouette_score(data, cluster_labels)
-        cal_score = calinski_harabaz_score(data,cluster_labels)
+        cluster_labels = clusterer.fit_predict(data_trabajo)
+        silhouette_avg = silhouette_score(data_valores, cluster_labels)
+        cal_score = calinski_harabaz_score(data_valores,cluster_labels)
         print("For n_clusters =", n_clusters+2,
               "The average silhouette_score is :", silhouette_avg,
               ", the calinski_harabaz score is ", cal_score,)
 
 def procesado(data):
-    data=cribador(data)
     data_final=data.groupby('Grupo')
     data_agrupada=[]
+    data_pendiente=[]
     for index,grupo in data_final:
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
-    #eleccion(data_agrupada)
+            data_pendiente.append(grupo.Pendiente)
+    eleccion(data_agrupada,data_pendiente)
     #exit()
     clustering=KMeans(n_clusters=_nClusters)
-    clustering.fit(data_agrupada)
+    clustering.fit(data_pendiente)
     clusters=[]
     datos=[]
     for i in range(_nClusters):
@@ -148,6 +131,7 @@ def procesado(data):
             nMaxDeEventosMalos=0
             plt.subplot(2,4,i+1)
             plt.plot(group)
+            plt.axis([0,15,40,350])
             for registro in group:
                 varianza+=registro*registro
                 n+=1
@@ -184,6 +168,14 @@ def main():
         archivo="../csv.txt"
     data=parser(archivo)
     data=filtro(data,0)
+    calculaPendiente(data)
     procesado(data)
 
+def calculaPendiente(data):
+    anterior=data['Historico'].mean()
+    pendiente=[]
+    for his in data['Historico']:
+        pendiente.append(his-anterior)
+        anterior=his
+    data['Pendiente']=pendiente
 main()
