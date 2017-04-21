@@ -8,7 +8,7 @@ from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, calinski_harabaz_score, silhouette_samples
-#import hdbscan
+import hdbscan
 
 valorMinimo=8
 _nClusters=8
@@ -18,6 +18,10 @@ nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Numero medio de eventos por encima del maximo (240)',
                 'Maximo numero de eventos fuera de rango(60-240)',
                 'Minimo numero de eventos fuera de rango(60-240)']
+
+def getRegistros0(data):
+    data=filtro(data,0)
+    return data
 
 def filtro(data,tipo):
     if (tipo==0):
@@ -30,6 +34,7 @@ def filtro(data,tipo):
         data=data.dropna(axis=0)
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
+    return data
 
 def clasificaPorHora(hora,hMin,format):
     hClasificar=datetime.strptime(hora,format)
@@ -151,12 +156,40 @@ def getInfo(clusters):
     return datos
 
 def getPlot(clusters):
-    for i in range(_nClusters):
+    tam=int(math.sqrt(len(clusters)))+1
+    for i in range(len(clusters)):
         for group in clusters[i]:
-            plt.subplot(2,4,i+1)
+            plt.subplot(tam,tam,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
     return plt
+
+def KMeansClustering(data,nclusters):
+    clustering=KMeans(n_clusters=nclusters)
+    clustering.fit(data)
+    clusters=[]
+    for i in range(_nClusters):
+        clusters.append([])
+    for i,j in zip(clustering.labels_,data):
+        clusters[i].append(j)
+    return clusters
+
+def KMeansClustering(data):
+    return KMeansClustering(data,_nClusters)
+
+def HSDBSCANclustering(data):
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=2)
+    clusterer.fit(data)
+    s,_nClusters=np.unique(clusterer.labels_,return_counts=True)
+    clusters=[]
+    for i in range(len(_nClusters)):
+        clusters.append([])
+    for i,j in zip(clusterer.labels_,data):
+        if (i!=-1):
+            clusters[i].append(j)
+        else:
+            clusters[len(clusters)-1].append(j)
+    return clusters
 
 def procesado(data):
     data_final=data.groupby('Grupo')
@@ -166,15 +199,10 @@ def procesado(data):
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
             #data_pendiente.append(grupo.Pendiente)
-    #infoKMeans(data_agrupada)
-    clustering=KMeans(n_clusters=_nClusters)
-    clustering.fit(data_agrupada)
-    clusters=[]
-    for i in range(_nClusters):
-        clusters.append([])
-    for i,j in zip(clustering.labels_,data_agrupada):
-        clusters[i].append(j)
-    datos=getInfo(clusters)
+    #clusters=KMeansClustering(data_agrupada)
+    clusters=HSDBSCANclustering(data_agrupada)
+    print len(clusters)
+    #datos=getInfo(clusters)
     getPlot(clusters).show()
 
 def main():
@@ -182,10 +210,9 @@ def main():
         archivo=sys.argv[1]
     else:
         archivo="../csv.txt"
-    data=parser(archivo)
-    filtro(data,0)
+    data=getRegistros0(parser(archivo))
     #data=rellenaUnSoloHueco(data)
-    calculaPendiente(data)
+    #calculaPendiente(data)
     procesado(data)
 
 def calculaPendiente(data):

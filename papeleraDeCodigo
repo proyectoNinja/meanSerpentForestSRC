@@ -1,5 +1,10 @@
 
 
+elif (tipo==1):
+    col=['Leida','Hora','Grupo']
+    data=data[col]
+    data=data.dropna(axis=0)
+
 
 from sklearn.utils import check_random_state, shuffle
 import matplotlib.cm as cm
