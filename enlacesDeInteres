@@ -1,3 +1,7 @@
+clustering:
+  http://hdbscan.readthedocs.io/en/latest/comparing_clustering_algorithms.html
+
+
 kmeans:
 https://jarroba.com/k-means-python-scikit-learn-ejemplos/
 http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html

@@ -8,7 +8,7 @@ from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, calinski_harabaz_score, silhouette_samples
-
+#import hdbscan
 
 valorMinimo=8
 _nClusters=8
@@ -28,26 +28,8 @@ def filtro(data,tipo):
         col=['Leida','Hora','Grupo']
         data=data[col]
         data=data.dropna(axis=0)
-    """tipos 4 y 5
-        elif (tipo==4):#
-            data['Carbohidratos']=data['Alimentos SV'].map(lambda comida: estimador(comida,data))
-        elif (tipo==5 or tipo==4):
-        #Carbohidratos
-            if (tipo==5):
-                col=['Carbohidratos','Hora','Grupo']
-                data=data[col]
-                data=data.dropna(axis=0)
-                data['Ingesta']=1
-            if (tipo==4):
-                if (data['Alimentos SV']):
-                    print 6
-            #elif (tipo==4):
-            #data['InsulinaTiempo']=Rapida/lenta 1/0
-            #data['InsulinaCantidad']=Int/NaN
-    """
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
-    return data
 
 def clasificaPorHora(hora,hMin,format):
     hClasificar=datetime.strptime(hora,format)
@@ -78,7 +60,7 @@ def parser(dir):
     data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
     return data
 
-def eleccion(data_valores, data_trabajo):
+def infoKMeans(data_trabajo, data_valores):
     for n_clusters in range(_nClusters-1):
         clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
         cluster_labels = clusterer.fit_predict(data_trabajo)
@@ -88,27 +70,35 @@ def eleccion(data_valores, data_trabajo):
               "The average silhouette_score is :", silhouette_avg,
               ", the calinski_harabaz score is ", cal_score,)
 
-def procesado(data):
-    data_final=data.groupby('Grupo')
-    data_agrupada=[]
-    data_pendiente=[]
-    for index,grupo in data_final:
-        if(len(grupo['Historico'])==16):
-            data_agrupada.append(grupo['Historico'])
-            data_pendiente.append(grupo.Pendiente)
-    eleccion(data_agrupada,data_pendiente)
-    #exit()
-    clustering=KMeans(n_clusters=_nClusters)
-    clustering.fit(data_pendiente)
-    clusters=[]
+def infoKMeans(data):
+    infoKMeans(data,data)
+
+def rellenaUnSoloHueco(data):
+    contadorFila=0
+    contadorGrupo=0
+    grupoActual=0
+    valorAnterior=data['Historico'].head()
+    horaGuardada=data.head(n=1).index
+    print str(horaGuardada)
+    for hora,valor,grupo in zip(data.index,data['Historico'],data['Grupo']):
+        contadorGrupo+=1
+        if (contadorGrupo==17):
+            grupoActual+=1
+            contadorGrupo=1
+        if(hora+17-horaGuardada>0 and hora+17-horaGuardada<10):
+            print "introducimos nuevo valor en ", hora+15
+            data[index+15]=[(valor+valorAnterior)/2,grupo]
+            contadorGrupo+=1
+        horaGuardada=hora
+        valorAnterior=valor
+    return data
+
+def getInfo(clusters):
     datos=[]
-    for i in range(_nClusters):
-        clusters.append([])
+    for i in range(len(clusters)):
         datos.append([])
         for j in range(9):
             datos[i].append([])
-    for i,j in zip(clustering.labels_,data_agrupada):
-        clusters[i].append(j)
     for i in range(_nClusters):
         sumaDeMedias=0
         sumaDeMaximos=0
@@ -119,7 +109,6 @@ def procesado(data):
         n=0
         glucosaMinMedia=sys.maxint
         glucosaMaxMedia=0
-        varianza=0
         nVecesEnRango=0
         nMinDeEventosMalos=16
         sumaDeEventosMalosGrupo=0
@@ -129,11 +118,7 @@ def procesado(data):
             sumaDeMinimos+=group.min()
             nSegmentos+=1
             nMaxDeEventosMalos=0
-            plt.subplot(2,4,i+1)
-            plt.plot(group)
-            plt.axis([0,15,40,350])
             for registro in group:
-                varianza+=registro*registro
                 n+=1
                 if (registro>=70 and registro<=180):
                     nVecesEnRango+=1
@@ -147,9 +132,7 @@ def procesado(data):
                 nMaxDeEventosMalos=sumaDeEventosMalosGrupo
             elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
                 nMinDeEventosMalos=sumaDeEventosMalosGrupo
-        varianza=varianza/n-(n+1*n+1)
         datos[i][0]=sumaDeMedias/nSegmentos #media
-        datos[i][1]=math.sqrt(varianza) #Desviacion estandar
         datos[i][2]=sumaDeMaximos/nSegmentos #media de maximos
         datos[i][3]=sumaDeMinimos/nSegmentos #media de minimos
         datos[i][4]=float(nVecesEnRango)/n*100 #% de tiempo en rango
@@ -157,9 +140,42 @@ def procesado(data):
         datos[i][6]=float(sumaDeEventosAltos)/n #media de eventos altos >240
         datos[i][7]=nMaxDeEventosMalos #maximo de eventos malos en un mismo segmento
         datos[i][8]=nMinDeEventosMalos #minimo de eventos malos en un mismo segmento
-    for cluster in range(8):
-        print datos[cluster]
-    plt.show()
+        varianza=0
+        n=0
+        for group in clusters[i]:
+            for registro in group:
+                varianza+=(registro-datos[i][0]) ** 2
+                n+=1
+        varianza=varianza/n
+        datos[i][1]=math.sqrt(varianza) #Desviacion estandar
+    return datos
+
+def getPlot(clusters):
+    for i in range(_nClusters):
+        for group in clusters[i]:
+            plt.subplot(2,4,i+1)
+            plt.plot(group)
+            plt.axis([0,15,40,350])
+    return plt
+
+def procesado(data):
+    data_final=data.groupby('Grupo')
+    data_agrupada=[]
+    data_pendiente=[]
+    for index,grupo in data_final:
+        if(len(grupo['Historico'])==16):
+            data_agrupada.append(grupo['Historico'])
+            #data_pendiente.append(grupo.Pendiente)
+    #infoKMeans(data_agrupada)
+    clustering=KMeans(n_clusters=_nClusters)
+    clustering.fit(data_agrupada)
+    clusters=[]
+    for i in range(_nClusters):
+        clusters.append([])
+    for i,j in zip(clustering.labels_,data_agrupada):
+        clusters[i].append(j)
+    datos=getInfo(clusters)
+    getPlot(clusters).show()
 
 def main():
     if (len(sys.argv)>1):
@@ -167,7 +183,8 @@ def main():
     else:
         archivo="../csv.txt"
     data=parser(archivo)
-    data=filtro(data,0)
+    filtro(data,0)
+    #data=rellenaUnSoloHueco(data)
     calculaPendiente(data)
     procesado(data)
 
