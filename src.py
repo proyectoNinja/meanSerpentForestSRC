@@ -64,7 +64,7 @@ def parser(dir):
     columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV',
     'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
     data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],
-    names=columnas,parse_dates='Hora')
+    names=columnas)
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
     data['Hora'].map(lambda x: get_group(x,primeraHora,format))
