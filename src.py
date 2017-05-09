@@ -11,7 +11,7 @@ from sklearn.metrics import silhouette_score, calinski_harabaz_score, silhouette
 import hdbscan
 
 valorMinimo=8
-_nClusters=8
+_nClusters=5
 nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
                 'Numero medio de eventos por debajo del minimo(60)',
@@ -35,6 +35,11 @@ def filtro(data,tipo):
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
     return data
+
+def get_group(hora,hMin,format):
+    group = 0
+    hora_Actual=datetime.strptime(hora,format)
+    hora_minima=datetime.strptime(hMin,format)
 
 def clasificaPorHora(hora,hMin,format):
     hClasificar=datetime.strptime(hora,format)
@@ -62,6 +67,7 @@ def parser(dir):
     names=columnas,parse_dates='Hora')
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
+    data['Hora'].map(lambda x: get_group(x,primeraHora,format))
     data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
     return data
 
@@ -104,7 +110,7 @@ def getInfo(clusters):
         datos.append([])
         for j in range(9):
             datos[i].append([])
-    for i in range(_nClusters):
+    for i in range(len(clusters)):
         sumaDeMedias=0
         sumaDeMaximos=0
         sumaDeMinimos=0
@@ -174,21 +180,24 @@ def KMeansClustering(data,nclusters):
         clusters[i].append(j)
     return clusters
 
-def KMeansClustering(data):
-    return KMeansClustering(data,_nClusters)
-
-def HSDBSCANclustering(data):
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=2)
+def HDBSCANclustering(data):
+    clusterer = hdbscan.HDBSCAN(metric='manhattan',min_cluster_size=2, min_samples=2)
     clusterer.fit(data)
-    s,_nClusters=np.unique(clusterer.labels_,return_counts=True)
+    _nClusters=clusterer.labels_.max()
+    silhouette_avg = silhouette_score(data, clusterer.labels_)
+    cal_score = calinski_harabaz_score(data,clusterer.labels_)
+    print("For n_clusters =", _nClusters,
+      "The average silhouette_score is :", silhouette_avg,
+      ", the calinski_harabaz score is ", cal_score,)
     clusters=[]
-    for i in range(len(_nClusters)):
+    for i in range(_nClusters+1):
         clusters.append([])
     for i,j in zip(clusterer.labels_,data):
         if (i!=-1):
             clusters[i].append(j)
+        """
         else:
-            clusters[len(clusters)-1].append(j)
+            clusters[len(clusters)-1].append(j)"""
     return clusters
 
 def procesado(data):
@@ -199,11 +208,12 @@ def procesado(data):
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
             #data_pendiente.append(grupo.Pendiente)
-    #clusters=KMeansClustering(data_agrupada)
-    clusters=HSDBSCANclustering(data_agrupada)
-    print len(clusters)
-    #datos=getInfo(clusters)
+    print len(data_agrupada)
+    clusters=KMeansClustering(data_agrupada,_nClusters)
+    #clusters=HDBSCANclustering(data_agrupada)
+    datos=getInfo(clusters)
     getPlot(clusters).show()
+    print datos
 
 def main():
     if (len(sys.argv)>1):
