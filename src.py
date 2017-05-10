@@ -72,7 +72,7 @@ def parser(dir):
     return data
 
 def infoKMeans(data_trabajo, data_valores):
-    for n_clusters in range(_nClusters-1):
+    for n_clusters in range(16):
         clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
         cluster_labels = clusterer.fit_predict(data_trabajo)
         silhouette_avg = silhouette_score(data_valores, cluster_labels)
@@ -80,9 +80,6 @@ def infoKMeans(data_trabajo, data_valores):
         print("For n_clusters =", n_clusters+2,
               "The average silhouette_score is :", silhouette_avg,
               ", the calinski_harabaz score is ", cal_score,)
-
-def infoKMeans(data):
-    infoKMeans(data,data)
 
 def rellenaUnSoloHueco(data):
     contadorFila=0
@@ -208,7 +205,8 @@ def procesado(data):
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
             #data_pendiente.append(grupo.Pendiente)
-    print len(data_agrupada)
+    #print len(data_agrupada)
+    infoKMeans(data_agrupada,data_agrupada)
     clusters=KMeansClustering(data_agrupada,_nClusters)
     #clusters=HDBSCANclustering(data_agrupada)
     datos=getInfo(clusters)
