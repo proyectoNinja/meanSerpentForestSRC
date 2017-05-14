@@ -1,4 +1,25 @@
 
+  """
+  plot = getPlot(clusters)
+  #plot.show()
+  plot.figure().savefig('../'+sys.argv[1]+'_graficas.png')
+  plot.close()
+  ""
+  for i in datos:
+      print i
+  """
+
+
+
+      """
+      #data_pendiente.append(grupo.Pendiente)
+  else:
+      #print len(grupo['Historico'])
+      if (len(grupo['Historico'])==14):
+          print grupo
+#print len(data_agrupada)
+"""
+#infoKMeans(data_agrupada,data_agrupada)
 
 elif (tipo==1):
     col=['Leida','Hora','Grupo']
