@@ -7,11 +7,12 @@ import timeit
 import math
 from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans, SpectralClustering
-from sklearn.metrics import silhouette_score,  silhouette_samples
+from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+from sklearn.metrics.cluster import calinski_harabaz_score
 from sklearn.preprocessing import Normalizer as norm
 import hdbscan
-#import RandomForestClustering as rfc
+import forest_cluster as rfc
 
 nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
@@ -181,7 +182,7 @@ def getPlotAndSave(clusters):
                 plt.subplot(5,5,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
-    plt.savefig(os.path.join(sys.argv[1]+'_graficasRFC.png'))
+    plt.savefig(os.path.join(sys.argv[1]+'_graficasAglo.png'))
     plt.show()
     return plt
 
@@ -190,7 +191,8 @@ def randomForestClustering(datas,normalizar):
         data=norm().fit_transform(datas)
     else:
         data=datas
-    cluster_labels=rfc.fit_transform(data)
+    print rfc
+    cluster_labels=rfc.RandomForestEmbedding().transform(data)
     print cluster_labels
     return cluster_labels
 
@@ -247,25 +249,48 @@ def spectral_Clustering(data):
         clusters[i].append(j)
     return clusters
 
-def HDBSCANclustering(datas,normalizar):
-    if (normalizar):
-        data=norm(norm='l1').fit_transform(datas)
-    else:
-        data=datas
+def clusteringAglomerativo(datas,normalizar):
+        etiquetas=[]
+        mejor=0
+        numero=0
+        if (normalizar):
+            data=norm().fit_transform(datas)
+        else:
+            data=datas
+        for n_clusters in range(6):
+            clusterer = AgglomerativeClustering(n_clusters=n_clusters+5, affinity='manhattan',linkage='complete')
+            cluster_labels = clusterer.fit_predict(data)
+            valor = calinski_harabaz_score(data, cluster_labels)
+            print("For n_clusters =", n_clusters+5,
+                  "The average silhouette_score is : ", valor)
+            if (valor>mejor):
+                mejor=valor
+                etiquetas=cluster_labels
+                numero=n_clusters+5
+        clusters=[]
+        for i in range(numero):
+            clusters.append([])
+        for i,j in zip(etiquetas,datas):
+            clusters[i].append(j)
+        return clusters
+
+def HDBSCANclustering(data):
     clusterer = hdbscan.HDBSCAN(metric='euclidean',min_cluster_size=2, min_samples=2)
     clusterer.fit(data)
-    _nClusters=clusterer.labels_.max()
+    _nClusters=clusterer.labels_.max()+1
     silhouette_avg = silhouette_score(data, clusterer.labels_)
-    print silhouette_avg,_nClusters+2
-    print cal_score
+    cal_score = calinski_harabaz_score(data,clusterer.labels_)
+    print("For n_clusters =", _nClusters-1,
+          "The average silhouette_score is :", silhouette_avg,
+          ", the calinski_harabaz score is ", cal_score)
     clusters=[]
-    for i in range(_nClusters+2):
+    for i in range(_nClusters+1):
         clusters.append([])
-    for i,j in zip(clusterer.labels_,datas):
+    for i,j in zip(clusterer.labels_,data):
         if (i!=-1):
             clusters[i].append(j)
         else:
-            clusters[len(clusters)-1].append(j)
+            clusters[_nClusters-1].append(j)
     return clusters
 
 def procesado(data):
@@ -275,8 +300,10 @@ def procesado(data):
     for index,grupo in data_final:
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
-    clusters=randomForestClustering(data_agrupada,False)
+    clusters=HDBSCANclustering(data_agrupada)
     """
+    clusters=clusteringAglomerativo(data_agrupada,False)
+    clusters=randomForestClustering(data_agrupada,False)
     data_norm=norm().fit_transform(data_agrupada)
     infoKMeans(data_norm,data_norm)
     #clusters=KMeansClustering(data_agrupada,0,True)
@@ -290,26 +317,39 @@ def procesado(data):
     plot.close()
 
 def main():
+    if (len(sys.argv)==0 or sys.argv[1]=="help"):
+        print "AYUDA"
+        exit()
     metric=False
     cluste=False
     _nCluster=False
+    cluster="kmeans"
     #metrica
-    #for param in sys.argv:
 
+    for param,index in zip(sys.argv,range(len(sys.argv))):
+        if (index==1):
+            archivo=param
+        elif(param=="kmeans" and not cluste):
+            cluster=param
+        elif(param=="agglomerative" and not cluste):
+            cluster=param
+        elif(param=="hdbscan"):
+            cluster=param
+        elif(par)
     if (len(sys.argv)>1):
         archivo=sys.argv[1]
-    """
-    if (len(sys.argv>2)):
-        metrica=sys
+        """
+        if (len(sys.argv>2)):
+            metrica=sys
 
 
-        tecnicaClustering=sys.argv[2]
-        if (tecnicaClustering=='kmeans'):
-    """
-    data=getRegistros0(parser(archivo))
-    #data=rellenaUnSoloHueco(data)
-    #calculaPendiente(data)
-    procesado(data)
+            tecnicaClustering=sys.argv[2]
+            if (tecnicaClustering=='kmeans'):
+        """
+        data=getRegistros0(parser(archivo))
+        #data=rellenaUnSoloHueco(data)
+        #calculaPendiente(data)
+        procesado(data)
 
 def calculaPendiente(data):
     anterior=data['Historico'].mean()

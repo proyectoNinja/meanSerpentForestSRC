@@ -29,4 +29,9 @@ def get_group(hora,hMin):
     mes0=hora_minima.month
     anyo0=hora_minima.year
     hora_base=datetime.strptime(anyo0+"/"+mes0+"/"+dia0,"%Y/%m/%d")
-    
+
+print int(sys.argv[1])
+try:
+    pass
+except Exception as e:
+    raise
