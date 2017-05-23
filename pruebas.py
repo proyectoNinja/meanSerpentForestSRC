@@ -20,7 +20,7 @@ def get_codigoTramo(hora):
         tramo=5
     return tramo
 
-def get_group(hora,hMin):
+def gt_group(hora,hMin):
     format="%Y/%m/%d %H:%M"
     group = 0
     hora_Actual=datetime.strptime(hora,format)
@@ -29,9 +29,11 @@ def get_group(hora,hMin):
     mes0=hora_minima.month
     anyo0=hora_minima.year
     hora_base=datetime.strptime(anyo0+"/"+mes0+"/"+dia0,"%Y/%m/%d")
-
+    print hora-hMin
+"""
 print int(sys.argv[1])
 try:
     pass
 except Exception as e:
     raise
+"""

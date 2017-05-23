@@ -21,8 +21,6 @@ nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Maximo numero de eventos fuera de rango(60-240)',
                 'Minimo numero de eventos fuera de rango(60-240)']
 
-
-
 def getRegistros0(data):
     data=filtro(data,0)
     return data
@@ -46,10 +44,10 @@ def get_group(hora,hMin,format):
     hora_minima=datetime.strptime(hMin,format)
     hora_minima.day
 
-def clasificaPorHora(hora,hMin,format):
+def clasificaPorHora(hora,hMin,format,desplazamiento):
     hClasificar=datetime.strptime(hora,format)
     hRef=datetime.strptime(hMin,format)
-    grupo=0
+    grupo=desplazamiento*100
     clasificado=False
     while(not clasificado):
         horas=4*(grupo+1)
@@ -65,15 +63,63 @@ def printAndPlotGroup(data,grupo):
     imprimir.plot()
     plt.show()
 
-def parser(dir):
+def gt_group(hora,hMin,desplazamiento):
+    format="%Y/%m/%d %H:%M"
+    group = 0
+    hora_Actual=datetime.strptime(hora,format)
+    hora_minima=datetime.strptime(hMin,format)
+    dia0=hora_minima.day
+    mes0=hora_minima.month
+    anyo0=hora_minima.year
+    codigo=-1
+    hora_=hora_Actual.hour
+    min_=hora_Actual.minute
+    """
+    if (hora_==23 and min_>53):
+        codigo=6
+    elif(hora_<4 or (hora_==4 and min_<7)):
+        codigo=0
+    elif(hora_<8 or (hora_==8 and min_<7)):
+        codigo=1
+    elif(hora_<12 or ((hora_==12) and min_<7)):
+        codigo=2
+    elif(hora_<16 or ((hora_==16) and min_<7)):
+        codigo=3
+    elif(hora_<20 or ((hora_==20) and min_<7)):
+        codigo=4
+    elif(hora_<24 or ((hora_==00) and min_<7)):
+        codigo=5
+    else:
+        codigo=9
+        print "ERROR"
+    """
+    if(hora_<4 ):
+        codigo=0
+    elif(hora_<8):
+        codigo=1
+    elif(hora_<12):
+        codigo=2
+    elif(hora_<16):
+        codigo=3
+    elif(hora_<20):
+        codigo=4
+    else:
+        codigo=5
+    string=str(anyo0)+"/"+str(mes0)+"/"+str(dia0)
+    hora_base=datetime.strptime(string,"%Y/%m/%d")
+    diferencia=hora_Actual-hora_base
+    out=desplazamiento*1000+10*(diferencia.days)+codigo
+    return out
+
+def parser(dir,desplazamiento):
     columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV',
     'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
-    data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],
-    names=columnas)
+    data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],names=columnas)
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
     data['Hora'].map(lambda x: get_group(x,primeraHora,format))
-    data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format))
+    data['Grupo']=data['Hora'].map(lambda x: gt_group(x,primeraHora,desplazamiento))
+    #data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format,desplazamiento))
     return data
 
 def infoKMeans(data_trabajo, data_valores):
@@ -166,6 +212,7 @@ def getInfo(clusters):
 
 def getPlotAndSave(clusters):
     n_clusters=len(clusters)
+    a=0
     for i in range(n_clusters):
         for group in clusters[i]:
             if (n_clusters<7):
@@ -176,13 +223,13 @@ def getPlotAndSave(clusters):
                 plt.subplot(3,3,i+1)
             elif(n_clusters==10):
                 plt.subplot(2,5,i+1)
-            elif(n_clusters<16):
+            elif(n_clusters<=16):
                 plt.subplot(4,4,i+1)
-            elif(n_clusters<25):
+            elif(n_clusters<=25):
                 plt.subplot(5,5,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
-    plt.savefig(os.path.join(sys.argv[1]+'_graficasAglo.png'))
+    #plt.savefig(os.path.join(sys.argv[1]+'invalido_graficas_'+sys.argv[2]+'.png'))
     plt.show()
     return plt
 
@@ -200,13 +247,13 @@ def KMeansNClustering(data,nclusters):
     clustering=KMeans(n_clusters=nclusters)
     clustering.fit(data)
     clusters=[]
-    for i in range(_nClusters):
+    for i in range(nclusters):
         clusters.append([])
     for i,j in zip(clustering.labels_,data):
         clusters[i].append(j)
     return clusters
 
-def KMeansClustering(datas,metrica,normalizar):
+def KMeansClustering(datas,normalizar):
     etiquetas=[]
     mejor=0
     numero=0
@@ -214,15 +261,16 @@ def KMeansClustering(datas,metrica,normalizar):
         data=norm().fit_transform(datas)
     else:
         data=datas
-    for n_clusters in range(6):
-        clusterer = KMeans(n_clusters=n_clusters+5, random_state=10)
+    for n_clusters in range(20):
+        n=n_clusters+2
+        clusterer = KMeans(n_clusters=n, random_state=10)
         cluster_labels = clusterer.fit_predict(data)
-        if (metrica==0):
-            valor = silhouette_score(data, cluster_labels)
+        valor = silhouette_score(data, cluster_labels)
+        print n ,": ",valor
         if (valor>mejor):
             mejor=valor
             etiquetas=cluster_labels
-            numero=n_clusters+5
+            numero=n
     clusters=[]
     for i in range(numero):
         clusters.append([])
@@ -293,33 +341,53 @@ def HDBSCANclustering(data):
             clusters[_nClusters-1].append(j)
     return clusters
 
-def procesado(data):
+def procesado(data,metodo,nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_pendiente=[]
+    clusters=[]
     for index,grupo in data_final:
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
-    clusters=HDBSCANclustering(data_agrupada)
-    """
-    clusters=clusteringAglomerativo(data_agrupada,False)
-    clusters=randomForestClustering(data_agrupada,False)
-    data_norm=norm().fit_transform(data_agrupada)
-    infoKMeans(data_norm,data_norm)
-    #clusters=KMeansClustering(data_agrupada,0,True)
-    #clusters=spectralclustering(data_agrupada)
-    #clusters=HDBSCANclustering(data_agrupada)
-    datos=getInfo(clusters)
+    if (metodo=="kmeans"):
+        clusters=KMeansClustering(data_agrupada,True)
+    elif(metodo=="aglomerative"):
+        clusters=clusteringAglomerativo(data_agrupada,True)
+    elif(metodo=="hbdscan"):
+        clusters=HDBSCANclustering(data_agrupada)
+    elif(metodo=="nkmeans"):
+        clusters=KMeansNClustering(data_agrupada,nucleos)
     plot = getPlotAndSave(clusters)
     plot.close()
-    """
-    plot = getPlotAndSave(clusters)
-    plot.close()
+    return zip(data_agrupada,clusters)
+
+def main2():
+    for param, index in zip(sys.argv,range(len(sys.argv))):
+        if (index==1):
+            data=getRegistros0(parser(param,index-1))
+        elif(index>1):
+            lectura=getRegistros0(parser(param,index-1))
+            data=data.append(lectura)
+    inOut=procesado(data,"nkmeans",nucleos=16)
 
 def main():
-    if (len(sys.argv)==0 or sys.argv[1]=="help"):
+    if (len(sys.argv)==1 or sys.argv[1]=="help"):
         print "AYUDA"
         exit()
+    else:
+        cluster="kmeans"
+        archivo=sys.argv[1]
+        if (len(sys.argv)>2):
+            param=sys.argv[2]
+            if(param=="kmeans"):
+                cluster=param
+            elif(param=="aglomerative"):
+                cluster=param
+            elif(param=="hdbscan"):
+                cluster=param
+        data=getRegistros0(parser(archivo,0))
+        procesado(data,cluster)
+    """
     metric=False
     cluste=False
     _nCluster=False
@@ -329,28 +397,22 @@ def main():
     for param,index in zip(sys.argv,range(len(sys.argv))):
         if (index==1):
             archivo=param
-        elif(param=="kmeans" and not cluste):
-            cluster=param
-        elif(param=="agglomerative" and not cluste):
-            cluster=param
-        elif(param=="hdbscan"):
-            cluster=param
-        elif(par)
+        el
     if (len(sys.argv)>1):
         archivo=sys.argv[1]
-        """
+        ""
         if (len(sys.argv>2)):
             metrica=sys
 
 
             tecnicaClustering=sys.argv[2]
             if (tecnicaClustering=='kmeans'):
-        """
+        ""
         data=getRegistros0(parser(archivo))
         #data=rellenaUnSoloHueco(data)
         #calculaPendiente(data)
         procesado(data)
-
+    """
 def calculaPendiente(data):
     anterior=data['Historico'].mean()
     pendiente=[]
@@ -359,4 +421,4 @@ def calculaPendiente(data):
         anterior=his
     data['Pendiente']=pendiente
 
-main()
+main2()
