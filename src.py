@@ -22,46 +22,12 @@ nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Minimo numero de eventos fuera de rango(60-240)']
 
 def getRegistros0(data):
-    data=filtro(data,0)
-    return data
-
-def filtro(data,tipo):
-    if (tipo==0):
-        col=['Historico','Hora','Grupo']
-        data=data[col]
-        data=data.dropna(axis=0)
-    elif (tipo==1):
-        col=['Leida','Hora','Grupo']
-        data=data[col]
-        data=data.dropna(axis=0)
+    col=['Historico','Hora','Grupo']
+    data=data[col]
+    data=data.dropna(axis=0)
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
     return data
-
-def get_group(hora,hMin,format):
-    group = 0
-    hora_Actual=datetime.strptime(hora,format)
-    hora_minima=datetime.strptime(hMin,format)
-    hora_minima.day
-
-def clasificaPorHora(hora,hMin,format,desplazamiento):
-    hClasificar=datetime.strptime(hora,format)
-    hRef=datetime.strptime(hMin,format)
-    grupo=desplazamiento*100
-    clasificado=False
-    while(not clasificado):
-        horas=4*(grupo+1)
-        if(hRef+timedelta(hours=horas)>hClasificar):
-            clasificado=True
-        else:
-            grupo=grupo+1
-    return int(grupo)
-
-def printAndPlotGroup(data,grupo):
-    imprimir=data.get_group(grupo).drop('Grupo',axis=1)
-    print imprimir
-    imprimir.plot()
-    plt.show()
 
 def gt_group(hora,hMin,desplazamiento):
     format="%Y/%m/%d %H:%M"
@@ -74,25 +40,6 @@ def gt_group(hora,hMin,desplazamiento):
     codigo=-1
     hora_=hora_Actual.hour
     min_=hora_Actual.minute
-    """
-    if (hora_==23 and min_>53):
-        codigo=6
-    elif(hora_<4 or (hora_==4 and min_<7)):
-        codigo=0
-    elif(hora_<8 or (hora_==8 and min_<7)):
-        codigo=1
-    elif(hora_<12 or ((hora_==12) and min_<7)):
-        codigo=2
-    elif(hora_<16 or ((hora_==16) and min_<7)):
-        codigo=3
-    elif(hora_<20 or ((hora_==20) and min_<7)):
-        codigo=4
-    elif(hora_<24 or ((hora_==00) and min_<7)):
-        codigo=5
-    else:
-        codigo=9
-        print "ERROR"
-    """
     if(hora_<4 ):
         codigo=0
     elif(hora_<8):
@@ -111,13 +58,13 @@ def gt_group(hora,hMin,desplazamiento):
     out=desplazamiento*1000+10*(diferencia.days)+codigo
     return out
 
-def parser(dir,desplazamiento):
+def parser(dir,desplazamiento=0):
     columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV',
     'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
     data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],names=columnas)
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
-    data['Hora'].map(lambda x: get_group(x,primeraHora,format))
+    #data['Hora'].map(lambda x: get_group(x,primeraHora,format))
     data['Grupo']=data['Hora'].map(lambda x: gt_group(x,primeraHora,desplazamiento))
     #data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format,desplazamiento))
     return data
@@ -243,13 +190,14 @@ def randomForestClustering(datas,normalizar):
     print cluster_labels
     return cluster_labels
 
-def KMeansNClustering(data,nclusters):
-    clustering=KMeans(n_clusters=nclusters)
+def KMeansNClustering(datas,n_clusters):
+    data=norm().fit_transform(datas)
+    clustering=KMeans(n_clusters=n_clusters, random_state=10)
     clustering.fit(data)
     clusters=[]
     for i in range(nclusters):
         clusters.append([])
-    for i,j in zip(clustering.labels_,data):
+    for i,j in zip(clustering.labels_,datas):
         clusters[i].append(j)
     return clusters
 
@@ -261,12 +209,11 @@ def KMeansClustering(datas,normalizar):
         data=norm().fit_transform(datas)
     else:
         data=datas
-    for n_clusters in range(20):
-        n=n_clusters+2
+    for n_clusters in range(6):
+        n=n_clusters+5
         clusterer = KMeans(n_clusters=n, random_state=10)
         cluster_labels = clusterer.fit_predict(data)
         valor = silhouette_score(data, cluster_labels)
-        print n ,": ",valor
         if (valor>mejor):
             mejor=valor
             etiquetas=cluster_labels
@@ -275,25 +222,6 @@ def KMeansClustering(datas,normalizar):
     for i in range(numero):
         clusters.append([])
     for i,j in zip(etiquetas,datas):
-        clusters[i].append(j)
-    return clusters
-
-def spectral_Clustering(data):
-    etiquetas=[]
-    mejor=0
-    numero=0
-    for n_clusters in range(6):
-        clusterer = spectral_clustering(data,n_clusters=n_clusters+5, random_state=10)
-        cluster_labels = clusterer.fit_predict(data)
-        valor = silhouette_score(data, cluster_labels)
-        if (valor>mejor):
-            mejor=valor
-            etiquetas=cluster_labels
-            numero=n_clusters+5
-    clusters=[]
-    for i in range(numero):
-        clusters.append([])
-    for i,j in zip(etiquetas,data):
         clusters[i].append(j)
     return clusters
 
@@ -373,52 +301,32 @@ def main2():
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
         print "AYUDA"
+        print "El formato de entrada correspondiente para un solo csv es el siguiente"
+        print "src.py [ruta y nombre del archivo][kmeans|aglomerative|hbdscan]"
+        print "Opcionalmente un argumento numerico en [2,36] puede ir tras KMeans o aglomerative"
         exit()
     else:
         cluster="kmeans"
+        nCluster=0
         archivo=sys.argv[1]
         if (len(sys.argv)>2):
             param=sys.argv[2]
             if(param=="kmeans"):
                 cluster=param
+                if(len(sys.argv)>3):
+                    try:
+                        nCluster=int(sys.argv[3])
+                        cluster ="nkmeans"
+                        if (nCluster>36 or nCluster<2):
+                            raise
+                    except Exception:
+                        print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
+                        exit()
             elif(param=="aglomerative"):
                 cluster=param
             elif(param=="hdbscan"):
                 cluster=param
-        data=getRegistros0(parser(archivo,0))
-        procesado(data,cluster)
-    """
-    metric=False
-    cluste=False
-    _nCluster=False
-    cluster="kmeans"
-    #metrica
-
-    for param,index in zip(sys.argv,range(len(sys.argv))):
-        if (index==1):
-            archivo=param
-        el
-    if (len(sys.argv)>1):
-        archivo=sys.argv[1]
-        ""
-        if (len(sys.argv>2)):
-            metrica=sys
-
-
-            tecnicaClustering=sys.argv[2]
-            if (tecnicaClustering=='kmeans'):
-        ""
         data=getRegistros0(parser(archivo))
-        #data=rellenaUnSoloHueco(data)
-        #calculaPendiente(data)
-        procesado(data)
-    """
-def calculaPendiente(data):
-    anterior=data['Historico'].mean()
-    pendiente=[]
-    for his in data['Historico']:
-        pendiente.append(his-anterior)
-        anterior=his
-    data['Pendiente']=pendiente
+        procesado(data,cluster)
 
-main2()
+main()

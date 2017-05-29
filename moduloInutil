@@ -1,0 +1,60 @@
+def calculaPendiente(data):
+    anterior=data['Historico'].mean()
+    pendiente=[]
+    for his in data['Historico']:
+        pendiente.append(his-anterior)
+        anterior=his
+    data['Pendiente']=pendiente
+
+
+def printAndPlotGroup(data,grupo):
+    imprimir=data.get_group(grupo).drop('Grupo',axis=1)
+    print imprimir
+    imprimir.plot()
+    plt.show()
+
+
+def clasificaPorHora(hora,hMin,format,desplazamiento):
+    hClasificar=datetime.strptime(hora,format)
+    hRef=datetime.strptime(hMin,format)
+    grupo=desplazamiento*100
+    clasificado=False
+    while(not clasificado):
+        horas=4*(grupo+1)
+        if(hRef+timedelta(hours=horas)>hClasificar):
+            clasificado=True
+        else:
+            grupo=grupo+1
+    return int(grupo)
+
+def filtro(data,tipo):
+    if (tipo==0):
+        col=['Historico','Hora','Grupo']
+        data=data[col]
+        data=data.dropna(axis=0)
+    elif (tipo==1):
+        col=['Leida','Hora','Grupo']
+        data=data[col]
+        data=data.dropna(axis=0)
+    format="%Y/%m/%d %H:%M"
+    data.set_index('Hora', inplace=True)
+    return data
+
+def spectral_Clustering(data):
+    etiquetas=[]
+    mejor=0
+    numero=0
+    for n_clusters in range(6):
+        clusterer = spectral_clustering(data,n_clusters=n_clusters+5, random_state=10)
+        cluster_labels = clusterer.fit_predict(data)
+        valor = silhouette_score(data, cluster_labels)
+        if (valor>mejor):
+            mejor=valor
+            etiquetas=cluster_labels
+            numero=n_clusters+5
+    clusters=[]
+    for i in range(numero):
+        clusters.append([])
+    for i,j in zip(etiquetas,data):
+        clusters[i].append(j)
+    return clusters

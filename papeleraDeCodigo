@@ -1,4 +1,59 @@
 
+    data=filtro(data,0)
+
+  """
+  if (hora_==23 and min_>53):
+      codigo=6
+  elif(hora_<4 or (hora_==4 and min_<7)):
+      codigo=0
+  elif(hora_<8 or (hora_==8 and min_<7)):
+      codigo=1
+  elif(hora_<12 or ((hora_==12) and min_<7)):
+      codigo=2
+  elif(hora_<16 or ((hora_==16) and min_<7)):
+      codigo=3
+  elif(hora_<20 or ((hora_==20) and min_<7)):
+      codigo=4
+  elif(hora_<24 or ((hora_==00) and min_<7)):
+      codigo=5
+  else:
+      codigo=9
+      print "ERROR"
+  """
+
+
+def get_group(hora,hMin,format):
+    group = 0
+    hora_Actual=datetime.strptime(hora,format)
+    hora_minima=datetime.strptime(hMin,format)
+    hora_minima.day
+
+main"""
+  metric=False
+  cluste=False
+  _nCluster=False
+  cluster="kmeans"
+  #metrica
+
+  for param,index in zip(sys.argv,range(len(sys.argv))):
+      if (index==1):
+          archivo=param
+      el
+  if (len(sys.argv)>1):
+      archivo=sys.argv[1]
+      ""
+      if (len(sys.argv>2)):
+          metrica=sys
+
+
+          tecnicaClustering=sys.argv[2]
+          if (tecnicaClustering=='kmeans'):
+      ""
+      data=getRegistros0(parser(archivo))
+      #data=rellenaUnSoloHueco(data)
+      #calculaPendiente(data)
+      procesado(data)
+  """
 
 
 
