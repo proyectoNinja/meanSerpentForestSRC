@@ -1,3 +1,17 @@
+"""
+def toPDF(clusters,codes):
+    pdf=FPDF('P','mm','A4')
+    pdf.add_page()
+    pdf.set_font('Times','',14)
+    texto="A continuacion le mostraremos el analis que hemos realizado con los datos que nos ha entregado.\n"
+    texto=texto+"Los resultados de estos analisis son el producto de la aplicacion de tecnicas de aprendizaje automatico\n"
+    texto+="Bajo ninguna circunstancia deberan sustituir a los consejo de su medico\n"
+    texto+="Ni la UCM, ni el grupo de investigacion se haran responsables del uso indevido que pueda hacerse con estos datos\n"
+    pdf.cell(100,10,texto,1)
+    pdf.output('../tuto.pdf','F')
+"""
+
+
 
   silhouette_avg = silhouette_score(data, clusterer.labels_)
   cal_score = calinski_harabaz_score(data,clusterer.labels_)
