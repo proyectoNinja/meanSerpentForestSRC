@@ -40,7 +40,7 @@ def gt_group(hora,hMin,desplazamiento):
     codigo=-1
     hora_=hora_Actual.hour
     min_=hora_Actual.minute
-    if(hora_<4 ):
+    if(hora_<4):
         codigo=0
     elif(hora_<8):
         codigo=1
@@ -64,20 +64,8 @@ def parser(dir,desplazamiento=0):
     data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],names=columnas)
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
-    #data['Hora'].map(lambda x: get_group(x,primeraHora,format))
     data['Grupo']=data['Hora'].map(lambda x: gt_group(x,primeraHora,desplazamiento))
-    #data['Grupo']=data['Hora'].map(lambda x: clasificaPorHora(x,primeraHora,format,desplazamiento))
     return data
-
-def infoKMeans(data_trabajo, data_valores):
-    for n_clusters in range(16):
-        clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
-        cluster_labels = clusterer.fit_predict(data_trabajo)
-        silhouette_avg = silhouette_score(data_valores, cluster_labels)
-        cal_score = calinski_harabaz_score(data_valores,cluster_labels)
-        print("For n_clusters =", n_clusters+2,
-              "The average silhouette_score is :", silhouette_avg,
-              ", the calinski_harabaz score is ", cal_score,)
 
 def rellenaUnSoloHueco(data):
     contadorFila=0
@@ -155,14 +143,40 @@ def getInfo(clusters):
                 n+=1
         varianza=varianza/n
         datos[i][1]=math.sqrt(varianza) #Desviacion estandar
+
+
     return datos
+
+def getStructCode(labels,nombre):
+    nClusters=labels.max()+1
+    code=[]
+    for j in range(nClusters):
+        code.append([])
+        for i in range(6):
+            code[j].append(0)
+    for grupo,name in zip(labels,nombre):
+        code[grupo][name%10]+=1
+    return code
+
+def getStructCluster(labels, data):
+    clusters=[]
+    numero=labels.max()+1
+    for i in range(numero):
+        clusters.append([])
+    for i,j in zip(labels,data):
+        clusters[i].append(j)
+    return clusters
 
 def getPlotAndSave(clusters):
     n_clusters=len(clusters)
     a=0
     for i in range(n_clusters):
         for group in clusters[i]:
-            if (n_clusters<7):
+            if (n_clusters<4):
+                plt.subplot(1,3,i+1)
+            elif (n_clusters<5):
+                plt.subplot(2,2,i+1)
+            elif (n_clusters<7):
                 plt.subplot(2,3,i+1)
             elif(n_clusters<9):
                 plt.subplot(2,4,i+1)
@@ -174,34 +188,20 @@ def getPlotAndSave(clusters):
                 plt.subplot(4,4,i+1)
             elif(n_clusters<=25):
                 plt.subplot(5,5,i+1)
+            elif(n_clusters<=36):
+                plt.subplot(6,6,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
-    #plt.savefig(os.path.join(sys.argv[1]+'invalido_graficas_'+sys.argv[2]+'.png'))
+    plt.savefig(os.path.join(sys.argv[1]+'_graficas_'+sys.argv[2]+'_'+str(n_clusters)+'.png'))
     plt.show()
     return plt
 
-def randomForestClustering(datas,normalizar):
-    if (normalizar):
-        data=norm().fit_transform(datas)
-    else:
-        data=datas
-    print rfc
-    cluster_labels=rfc.RandomForestEmbedding().transform(data)
-    print cluster_labels
-    return cluster_labels
-
-def KMeansNClustering(datas,n_clusters):
+def KMeansNClustering(datas,nombre,n_clusters):
     data=norm().fit_transform(datas)
-    clustering=KMeans(n_clusters=n_clusters, random_state=10)
-    clustering.fit(data)
-    clusters=[]
-    for i in range(nclusters):
-        clusters.append([])
-    for i,j in zip(clustering.labels_,datas):
-        clusters[i].append(j)
-    return clusters
+    clusterer=KMeans(n_clusters=n_clusters, random_state=10)
+    return clusterer.fit_predict(data)
 
-def KMeansClustering(datas,normalizar):
+def KMeansClustering(datas,normalizar=True):
     etiquetas=[]
     mejor=0
     numero=0
@@ -218,14 +218,9 @@ def KMeansClustering(datas,normalizar):
             mejor=valor
             etiquetas=cluster_labels
             numero=n
-    clusters=[]
-    for i in range(numero):
-        clusters.append([])
-    for i,j in zip(etiquetas,datas):
-        clusters[i].append(j)
-    return clusters
+    return cluster_labels
 
-def clusteringAglomerativo(datas,normalizar):
+def clusteringAglomerativo(datas,normalizar=True):
         etiquetas=[]
         mejor=0
         numero=0
@@ -237,28 +232,19 @@ def clusteringAglomerativo(datas,normalizar):
             clusterer = AgglomerativeClustering(n_clusters=n_clusters+5, affinity='manhattan',linkage='complete')
             cluster_labels = clusterer.fit_predict(data)
             valor = calinski_harabaz_score(data, cluster_labels)
-            print("For n_clusters =", n_clusters+5,
-                  "The average silhouette_score is : ", valor)
             if (valor>mejor):
                 mejor=valor
                 etiquetas=cluster_labels
                 numero=n_clusters+5
-        clusters=[]
-        for i in range(numero):
-            clusters.append([])
-        for i,j in zip(etiquetas,datas):
-            clusters[i].append(j)
-        return clusters
+        return cluster_labels
 
+def clusteringNAglomerativo(data,nCluster):
+    return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
+    
 def HDBSCANclustering(data):
     clusterer = hdbscan.HDBSCAN(metric='euclidean',min_cluster_size=2, min_samples=2)
     clusterer.fit(data)
     _nClusters=clusterer.labels_.max()+1
-    silhouette_avg = silhouette_score(data, clusterer.labels_)
-    cal_score = calinski_harabaz_score(data,clusterer.labels_)
-    print("For n_clusters =", _nClusters-1,
-          "The average silhouette_score is :", silhouette_avg,
-          ", the calinski_harabaz score is ", cal_score)
     clusters=[]
     for i in range(_nClusters+1):
         clusters.append([])
@@ -272,31 +258,36 @@ def HDBSCANclustering(data):
 def procesado(data,metodo,nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
-    data_pendiente=[]
-    clusters=[]
+    data_nombre=[]
+    etiquetas=[]
     for index,grupo in data_final:
         if(len(grupo['Historico'])==16):
             data_agrupada.append(grupo['Historico'])
-    if (metodo=="kmeans"):
-        clusters=KMeansClustering(data_agrupada,True)
-    elif(metodo=="aglomerative"):
-        clusters=clusteringAglomerativo(data_agrupada,True)
-    elif(metodo=="hbdscan"):
-        clusters=HDBSCANclustering(data_agrupada)
-    elif(metodo=="nkmeans"):
-        clusters=KMeansNClustering(data_agrupada,nucleos)
+            data_nombre.append(index)
+    data_norm=norm().fit_transform(data_agrupada)
+    if (nucleos>0):
+        if (metodo=="kmeans"):
+            etiquetas=KMeans(n_clusters=nucleos, random_state=10).fit_predict(data_norm)
+        elif(metodo=="aglomerative"):
+            etiquetas=clusteringNAglomerativo(data_agrupada,data_nombre,nucleos)
+    else:
+        if (metodo=="kmeans"):
+            etiquetas=KMeansClustering(data_agrupada)
+            nucleos=etiquetas.max()+1
+        elif(metodo=="aglomerative"):
+            etiquetas=clusteringAglomerativo(data_agrupada)
+            nucleos=etiquetas.max()+1
+        elif(metodo=="hbdscan"):
+            clusters=HDBSCANclustering(data_agrupada)
+        else:
+            exit()
+    code=getStructCode(etiquetas,data_nombre)
+    clusters=getStructCluster(etiquetas,data_agrupada)
+    for h,i in zip(code,range(len(code))):
+        print "Cluster numero ", i,"esta formado por ",h
     plot = getPlotAndSave(clusters)
     plot.close()
-    return zip(data_agrupada,clusters)
-
-def main2():
-    for param, index in zip(sys.argv,range(len(sys.argv))):
-        if (index==1):
-            data=getRegistros0(parser(param,index-1))
-        elif(index>1):
-            lectura=getRegistros0(parser(param,index-1))
-            data=data.append(lectura)
-    inOut=procesado(data,"nkmeans",nucleos=16)
+    return zip(data_agrupada,trabajado,contado)
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
@@ -311,22 +302,19 @@ def main():
         archivo=sys.argv[1]
         if (len(sys.argv)>2):
             param=sys.argv[2]
-            if(param=="kmeans"):
+            if((param=="kmeans") or (param=="aglomerative")):
                 cluster=param
                 if(len(sys.argv)>3):
                     try:
                         nCluster=int(sys.argv[3])
-                        cluster ="nkmeans"
                         if (nCluster>36 or nCluster<2):
                             raise
                     except Exception:
                         print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
                         exit()
-            elif(param=="aglomerative"):
-                cluster=param
             elif(param=="hdbscan"):
                 cluster=param
         data=getRegistros0(parser(archivo))
-        procesado(data,cluster)
+        procesado(data,cluster,nCluster)
 
 main()

@@ -1,4 +1,11 @@
 
+  silhouette_avg = silhouette_score(data, clusterer.labels_)
+  cal_score = calinski_harabaz_score(data,clusterer.labels_)
+  print("For n_clusters =", _nClusters-1,
+        "The average silhouette_score is :", silhouette_avg,
+        ", the calinski_harabaz score is ", cal_score)
+
+
     data=filtro(data,0)
 
   """

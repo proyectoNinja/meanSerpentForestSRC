@@ -13,6 +13,15 @@ def printAndPlotGroup(data,grupo):
     imprimir.plot()
     plt.show()
 
+def randomForestClustering(datas,normalizar):
+    if (normalizar):
+        data=norm().fit_transform(datas)
+    else:
+        data=datas
+    print rfc
+    cluster_labels=rfc.RandomForestEmbedding().fit_transform(data)
+    print cluster_labels
+    return cluster_labels
 
 def clasificaPorHora(hora,hMin,format,desplazamiento):
     hClasificar=datetime.strptime(hora,format)
@@ -58,3 +67,22 @@ def spectral_Clustering(data):
     for i,j in zip(etiquetas,data):
         clusters[i].append(j)
     return clusters
+
+def infoKMeans(data_trabajo, data_valores):
+    for n_clusters in range(16):
+        clusterer = KMeans(n_clusters=n_clusters+2, random_state=10)
+        cluster_labels = clusterer.fit_predict(data_trabajo)
+        silhouette_avg = silhouette_score(data_valores, cluster_labels)
+        cal_score = calinski_harabaz_score(data_valores,cluster_labels)
+        print("For n_clusters =", n_clusters+2,
+              "The average silhouette_score is :", silhouette_avg,
+              ", the calinski_harabaz score is ", cal_score,)
+
+def main2():
+    for param, index in zip(sys.argv,range(len(sys.argv))):
+        if (index==1):
+            data=getRegistros0(parser(param,index-1))
+        elif(index>1):
+            lectura=getRegistros0(parser(param,index-1))
+            data=data.append(lectura)
+    inOut=procesado(data,"nkmeans",nucleos=16)
