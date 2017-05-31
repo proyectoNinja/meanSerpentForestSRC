@@ -1,3 +1,11 @@
+
+  """
+  for h,i in zip(code,range(len(code))):
+      print "Cluster numero ", i,"esta formado por ",h
+  #plot = getPlotAndSave(clusters)
+  #plot.close()
+  """
+
 """
 def toPDF(clusters,codes):
     pdf=FPDF('P','mm','A4')

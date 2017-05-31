@@ -104,13 +104,13 @@ def getInfo(clusters):
         glucosaMaxMedia=0
         nVecesEnRango=0
         nMinDeEventosMalos=16
+        nMaxDeEventosMalos=0
         sumaDeEventosMalosGrupo=0
         for group in clusters[i]:
             sumaDeMedias+=group.mean()
             sumaDeMaximos+=group.max()
             sumaDeMinimos+=group.min()
             nSegmentos+=1
-            nMaxDeEventosMalos=0
             for registro in group:
                 n+=1
                 if (registro>=70 and registro<=180):

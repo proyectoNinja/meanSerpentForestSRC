@@ -80,8 +80,6 @@ def rellenaUnSoloHueco(data):
         valorAnterior=valor
     return data
 
-
-
 def getStructCode(labels,nombre):
     nClusters=labels.max()+1
     code=[]
@@ -189,14 +187,8 @@ def procesado(data,metodo,nucleos=0):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
-    """
-    for h,i in zip(code,range(len(code))):
-        print "Cluster numero ", i,"esta formado por ",h
-    #plot = getPlotAndSave(clusters)
-    #plot.close()
-    """
     impresion.toPDF(clusters,code,metodo)
-    #return zip(data_agrupada,trabajado,contado)
+
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
