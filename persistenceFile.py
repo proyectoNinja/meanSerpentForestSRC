@@ -1,6 +1,7 @@
 import sys
 import math
 import os
+import numpy as np
 from fpdf import FPDF
 import matplotlib.pyplot as plt
 
@@ -12,7 +13,7 @@ nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Maximo numero de eventos fuera de rango(60-240)',
                 'Minimo numero de eventos fuera de rango(60-240)']
 
-def getPlotAndSave(clusters):
+def getPlotAndSave(clusters,ruta):
     n_clusters=len(clusters)
     for i in range(n_clusters):
         for group in clusters[i]:
@@ -36,7 +37,7 @@ def getPlotAndSave(clusters):
                 plt.subplot(6,6,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
-    plt.savefig('img.png')
+    plt.savefig(ruta+'img.png')
     #plt.show()
     #return plt
 
@@ -171,12 +172,13 @@ def genTabla(clusters,pdf):
         pdf.ln()
     return pdf
 
-def saveData(etiquetas,nombres,datos):
+def saveData(ruta,etiquetas,nombres,datos):
     nCarpetas=etiquetas.max()
-    for i in range(nCarpetas):
-        so.mkdir(i)
+
+    for i in range(nCarpetas+1):
+        os.mkdir(ruta+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):
-        dato.to_csv(str(cluster)+'/'+str(nombre)+'.csv')
+        np.savetxt(ruta+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
 
 
 def toPDF(clusters,codes,metodo,ruta=""):
@@ -198,8 +200,8 @@ def toPDF(clusters,codes,metodo,ruta=""):
     with open('explica', 'rb') as fh:
             pos = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,pos)
-    getPlotAndSave(clusters)
-    pdf.image('img.png', 0,pdf.get_y() ,8*28)
+    getPlotAndSave(clusters,ruta)
+    pdf.image(ruta+'img.png', 0,pdf.get_y() ,8*28)
     pdf.add_page()
     pdf.multi_cell(0,5,genDescGraf(codes))
     pdf.ln()

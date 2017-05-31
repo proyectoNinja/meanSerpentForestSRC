@@ -13,6 +13,7 @@ def getRegistros0(data):
     col=['Historico','Hora','Grupo']
     data=data[col]
     data=data.dropna(axis=0)
+    #data['Historico']=data['Historico'].map(lambda x:int(x))
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
     return data
@@ -48,7 +49,7 @@ def gt_group(hora,hMin,desplazamiento):
 
 def parser(dir,desplazamiento=0):
     columnas=['Hora','Tipo','Historico','Leida','Insulina rapida SV',
-    'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
+            'Insulina rapida U','Alimentos SV','Carbohidratos','Insulina lenta SV']
     data=pd.read_table(dir,header=1,usecols=[1,2,3,4,5,6,7,8,9],names=columnas)
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
@@ -120,7 +121,7 @@ def clusteringAglomerativo(datas,normalizar=True):
 def clusteringNAglomerativo(data,nCluster):
     return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
 
-def procesado(data,metodo,ruta="",nucleos=0):
+def procesado(data,metodo,ruta="/tmp/",nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_nombre=[]
@@ -149,7 +150,7 @@ def procesado(data,metodo,ruta="",nucleos=0):
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
     persistenceFile.toPDF(clusters,code,metodo,ruta)
-    persistenceFile.saveData(etiquetas,data_agrupada,data_nombre)
+    persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada)
 
 def mainWeb(rutas,metodo="kmeans",nucleos=0):
     data=getRegistros0(parser(rutas+"csv.txt"))
@@ -180,5 +181,5 @@ def main():
                         exit()
         data=getRegistros0(parser(archivo))
         procesado(data,cluster,nucleos=nCluster)
-#main()
-mainWeb(sys.argv[1])
+main()
+#mainWeb(sys.argv[1])
