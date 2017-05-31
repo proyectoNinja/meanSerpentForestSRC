@@ -4,7 +4,6 @@ import sys
 import os
 import time
 import timeit
-import math
 from datetime import datetime,timedelta
 from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
@@ -13,13 +12,6 @@ from sklearn.preprocessing import Normalizer as norm
 import hdbscan
 import forest_cluster as rfc
 import impresion
-
-nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
-                'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
-                'Numero medio de eventos por debajo del minimo(60)',
-                'Numero medio de eventos por encima del maximo (240)',
-                'Maximo numero de eventos fuera de rango(60-240)',
-                'Minimo numero de eventos fuera de rango(60-240)']
 
 def getRegistros0(data):
     col=['Historico','Hora','Grupo']
@@ -88,64 +80,7 @@ def rellenaUnSoloHueco(data):
         valorAnterior=valor
     return data
 
-def getInfo(clusters):
-    datos=[]
-    for i in range(len(clusters)):
-        datos.append([])
-        for j in range(9):
-            datos[i].append([])
-    for i in range(len(clusters)):
-        sumaDeMedias=0
-        sumaDeMaximos=0
-        sumaDeMinimos=0
-        sumaDeEventosBajos=0
-        sumaDeEventosAltos=0
-        nSegmentos=0
-        n=0
-        glucosaMinMedia=sys.maxint
-        glucosaMaxMedia=0
-        nVecesEnRango=0
-        nMinDeEventosMalos=16
-        sumaDeEventosMalosGrupo=0
-        for group in clusters[i]:
-            sumaDeMedias+=group.mean()
-            sumaDeMaximos+=group.max()
-            sumaDeMinimos+=group.min()
-            nSegmentos+=1
-            nMaxDeEventosMalos=0
-            for registro in group:
-                n+=1
-                if (registro>=70 and registro<=180):
-                    nVecesEnRango+=1
-                elif (registro<=60):
-                    sumaDeEventosBajos+=1
-                    sumaDeEventosMalosGrupo+=1
-                elif (registro>=240):
-                    sumaDeEventosAltos+=1
-                    sumaDeEventosMalosGrupo+=1
-            if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
-                nMaxDeEventosMalos=sumaDeEventosMalosGrupo
-            elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
-                nMinDeEventosMalos=sumaDeEventosMalosGrupo
-        datos[i][0]=sumaDeMedias/nSegmentos #media
-        datos[i][2]=sumaDeMaximos/nSegmentos #media de maximos
-        datos[i][3]=sumaDeMinimos/nSegmentos #media de minimos
-        datos[i][4]=float(nVecesEnRango)/n*100 #% de tiempo en rango
-        datos[i][5]=float(sumaDeEventosBajos)/n #media de eventos bajos <60
-        datos[i][6]=float(sumaDeEventosAltos)/n #media de eventos altos >240
-        datos[i][7]=nMaxDeEventosMalos #maximo de eventos malos en un mismo segmento
-        datos[i][8]=nMinDeEventosMalos #minimo de eventos malos en un mismo segmento
-        varianza=0
-        n=0
-        for group in clusters[i]:
-            for registro in group:
-                varianza+=(registro-datos[i][0]) ** 2
-                n+=1
-        varianza=varianza/n
-        datos[i][1]=math.sqrt(varianza) #Desviacion estandar
 
-
-    return datos
 
 def getStructCode(labels,nombre):
     nClusters=labels.max()+1
@@ -254,10 +189,12 @@ def procesado(data,metodo,nucleos=0):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
+    """
     for h,i in zip(code,range(len(code))):
         print "Cluster numero ", i,"esta formado por ",h
     #plot = getPlotAndSave(clusters)
     #plot.close()
+    """
     impresion.toPDF(clusters,code,metodo)
     #return zip(data_agrupada,trabajado,contado)
 

@@ -1,0 +1,12 @@
+Cada una de las lineas que verá en las graficas representa un tramo distinto. Cada uno de estos clusters puede caracterizarse según unos datos estadísticos que hemos creido conveniente detallar.
+De cada cluster (enumerados de 1 en adelante, de izquierda a derecha y de arriba a abajo) detallaremos que tipos de tramo tienen(00-04, 04-08, 08-12, 12-16, 16-20, 20-24) y las siguientes medidas:
+
+(A) - Glucosa Media
+(B) - Desviación típica
+(C) - Glucosa máxima media
+(D) - Glucosa mínima media
+(E) - Porcentaje de tiempo en rango 70-180
+(F) - Numero medio de eventos por debajo del mínimo(60)
+(G) - Numero medio de eventos por encima del máximo (240)
+(H) - Máximo numero de eventos fuera de rango(60-240)
+(I) - Mínimo numero de eventos fuera de rango(60-240)
