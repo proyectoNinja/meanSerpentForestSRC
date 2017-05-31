@@ -1,5 +1,6 @@
 import sys
 import math
+import os
 from fpdf import FPDF
 import matplotlib.pyplot as plt
 
@@ -170,7 +171,15 @@ def genTabla(clusters,pdf):
         pdf.ln()
     return pdf
 
-def toPDF(clusters,codes,metodo):
+def saveData(etiquetas,nombres,datos):
+    nCarpetas=etiquetas.max()
+    for i in range(nCarpetas):
+        so.mkdir(i)
+    for cluster,nombre,dato in zip(etiquetas,nombres,datos):
+        dato.to_csv(str(cluster)+'/'+str(nombre)+'.csv')
+
+
+def toPDF(clusters,codes,metodo,ruta=""):
     pdf=FPDF('P','mm','A4')
     pdf.add_page()
     titulo="Informe glucemico"
@@ -201,4 +210,4 @@ def toPDF(clusters,codes,metodo):
     with open('responsabilidad', 'rb') as fh:
             res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
-    pdf.output('../informe.pdf','F')
+    pdf.output(ruta+'informe.pdf','F')

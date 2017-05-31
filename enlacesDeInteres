@@ -1,5 +1,6 @@
+
 pdf:
-  https://pyfpdf.readthedocs.io/en/latest/Tutorial/index.html
+  http://ricardogeek.com/como-crear-documentos-pdf-usando-python/
 
 clustering:
   http://hdbscan.readthedocs.io/en/latest/comparing_clustering_algorithms.html

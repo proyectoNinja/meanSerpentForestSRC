@@ -1,17 +1,13 @@
 import pandas as pd
 import numpy as np
 import sys
-import os
-import time
-import timeit
 from datetime import datetime,timedelta
 from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 from sklearn.metrics.cluster import calinski_harabaz_score
 from sklearn.preprocessing import Normalizer as norm
 import hdbscan
-import forest_cluster as rfc
-import impresion
+import persistenceFile
 
 def getRegistros0(data):
     col=['Historico','Hora','Grupo']
@@ -57,27 +53,6 @@ def parser(dir,desplazamiento=0):
     format="%Y/%m/%d %H:%M"
     primeraHora = data['Hora'].min()
     data['Grupo']=data['Hora'].map(lambda x: gt_group(x,primeraHora,desplazamiento))
-    return data
-
-def rellenaUnSoloHueco(data):
-    contadorFila=0
-    contadorGrupo=0
-    grupoActual=0
-    valorAnterior=data['Historico'].head()
-    horaGuardada=data.head(n=1).index
-    print str(horaGuardada)
-    for fila,valor,grupo in zip(data.rows,data['Historico'],data['Grupo']):
-        contadorGrupo+=1
-        if (contadorGrupo==17):
-            grupoActual+=1
-            contadorGrupo=1
-        if(hora+17-horaGuardada>0 and hora+17-horaGuardada<10):
-            print "introducimos nuevo valor en ", hora+15
-            data.loc
-            data[index+15]=[(valor+valorAnterior)/2,grupo]
-            contadorGrupo+=1
-        horaGuardada=hora
-        valorAnterior=valor
     return data
 
 def getStructCode(labels,nombre):
@@ -145,21 +120,7 @@ def clusteringAglomerativo(datas,normalizar=True):
 def clusteringNAglomerativo(data,nCluster):
     return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
 
-def HDBSCANclustering(data):
-    clusterer = hdbscan.HDBSCAN(metric='euclidean',min_cluster_size=2, min_samples=2)
-    clusterer.fit(data)
-    _nClusters=clusterer.labels_.max()+1
-    clusters=[]
-    for i in range(_nClusters+1):
-        clusters.append([])
-    for i,j in zip(clusterer.labels_,data):
-        if (i!=-1):
-            clusters[i].append(j)
-        else:
-            clusters[_nClusters-1].append(j)
-    return clusters
-
-def procesado(data,metodo,nucleos=0):
+def procesado(data,metodo,ruta="",nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_nombre=[]
@@ -187,8 +148,12 @@ def procesado(data,metodo,nucleos=0):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
-    impresion.toPDF(clusters,code,metodo)
+    persistenceFile.toPDF(clusters,code,metodo,ruta)
+    persistenceFile.saveData(etiquetas,data_agrupada,data_nombre)
 
+def mainWeb(rutas,metodo="kmeans",nucleos=0):
+    data=getRegistros0(parser(rutas+"csv.txt"))
+    procesado(data,metodo,ruta=rutas,nucleos=nucleos)
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
@@ -213,9 +178,7 @@ def main():
                     except Exception:
                         print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
                         exit()
-            elif(param=="hdbscan"):
-                cluster=param
         data=getRegistros0(parser(archivo))
-        procesado(data,cluster,nCluster)
-
-main()
+        procesado(data,cluster,nucleos=nCluster)
+#main()
+mainWeb(sys.argv[1])

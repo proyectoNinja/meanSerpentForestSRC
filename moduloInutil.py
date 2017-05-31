@@ -1,3 +1,17 @@
+def HDBSCANclustering(data):
+    clusterer = hdbscan.HDBSCAN(metric='euclidean',min_cluster_size=2, min_samples=2)
+    clusterer.fit(data)
+    _nClusters=clusterer.labels_.max()+1
+    clusters=[]
+    for i in range(_nClusters+1):
+        clusters.append([])
+    for i,j in zip(clusterer.labels_,data):
+        if (i!=-1):
+            clusters[i].append(j)
+        else:
+            clusters[_nClusters-1].append(j)
+    return clusters
+
 
 def get_codigoTramo(hora):
     tramo=0
