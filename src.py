@@ -121,7 +121,7 @@ def clusteringAglomerativo(datas,normalizar=True):
 def clusteringNAglomerativo(data,nCluster):
     return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
 
-def procesado(data,metodo,ruta="/tmp/",nucleos=0):
+def procesado(data,modo,metodo,ruta="/tmp/",nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_nombre=[]
@@ -149,37 +149,55 @@ def procesado(data,metodo,ruta="/tmp/",nucleos=0):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
-    persistenceFile.toPDF(clusters,code,metodo,ruta)
+    if (modo=="web"):
+        persistenceFile.toPDF(clusters,code,metodo,ruta)
     persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada)
 
 def mainWeb(rutas,metodo="kmeans",nucleos=0):
     data=getRegistros0(parser(rutas+"csv.txt"))
-    procesado(data,metodo,ruta=rutas,nucleos=nucleos)
+    procesado(data,"web",metodo,ruta=rutas,nucleos=nucleos)
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
         print "AYUDA"
         print "El formato de entrada correspondiente para un solo csv es el siguiente"
-        print "src.py [ruta y nombre del archivo][kmeans|aglomerative|hbdscan]"
-        print "Opcionalmente un argumento numerico en [2,36] puede ir tras KMeans o aglomerative"
+        print "src.py [archivo][ruta_destino][kmeans|aglomerative|hbdscan][num_clusters]"
+        print "num_clusters [2,36] solo puede ir tras KMeans o aglomerative"
         exit()
     else:
         cluster="kmeans"
         nCluster=0
         archivo=sys.argv[1]
         if (len(sys.argv)>2):
-            param=sys.argv[2]
-            if((param=="kmeans") or (param=="aglomerative")):
-                cluster=param
-                if(len(sys.argv)>3):
-                    try:
-                        nCluster=int(sys.argv[3])
-                        if (nCluster>36 or nCluster<2):
-                            raise
-                    except Exception:
-                        print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
-                        exit()
+            ruta=sys.argv[2]
+            if(len(sys.argv)>3):
+                param=sys.argv[3]
+                if((param=="kmeans") or (param=="aglomerative")):
+                    cluster=param
+                    if(len(sys.argv)>4):
+                        try:
+                            nCluster=int(sys.argv[4])
+                            if (nCluster>36 or nCluster<2):
+                                raise
+                        except Exception:
+                            print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
+                            exit()
         data=getRegistros0(parser(archivo))
-        procesado(data,cluster,nucleos=nCluster)
-main()
+        procesado(data,"terminal",cluster,nucleos=nCluster)
+#main()
+
+def HDBSCANclustering(data):
+    clusterer = hdbscan.HDBSCAN(metric='l2',min_cluster_size=2, min_samples=1)
+    clusterer.fit(data)
+    _nClusters=clusterer.labels_.max()+1
+    clusters=[]
+    for i in range(_nClusters+1):
+        clusters.append([])
+    for i,j in zip(clusterer.labels_,data):
+        if (i!=-1):
+            clusters[i].append(j)
+        else:
+            clusters[_nClusters-1].append(j)
+    return clusters
+
 #mainWeb(sys.argv[1])

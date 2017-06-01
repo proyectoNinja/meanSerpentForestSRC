@@ -5,7 +5,6 @@ import numpy as np
 from fpdf import FPDF
 import matplotlib.pyplot as plt
 
-
 nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
                 'Numero medio de eventos por debajo del minimo(60)',
@@ -179,7 +178,6 @@ def saveData(ruta,etiquetas,nombres,datos):
         os.mkdir(ruta+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):
         np.savetxt(ruta+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
-
 
 def toPDF(clusters,codes,metodo,ruta=""):
     pdf=FPDF('P','mm','A4')
