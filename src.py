@@ -67,13 +67,22 @@ def getStructCode(labels,nombre):
         code[grupo][name%10]+=1
     return code
 
-def getStructCluster(labels, data):
+def getStructCluster(labels, data,mode='kmeans'):
     clusters=[]
     numero=labels.max()+1
-    for i in range(numero):
-        clusters.append([])
-    for i,j in zip(labels,data):
-        clusters[i].append(j)
+    if (mode=='hdbscan'):
+        for i in range(_nClusters+1):
+            clusters.append([])
+        for i,j in zip(clusterer.labels_,data):
+            if (i!=-1):
+                clusters[i].append(j)
+            else:
+                clusters[_nClusters-1].append(j)
+    else:
+        for i in range(numero):
+            clusters.append([])
+        for i,j in zip(labels,data):
+            clusters[i].append(j)
     return clusters
 
 def KMeansNClustering(datas,nombre,n_clusters):
@@ -144,7 +153,8 @@ def procesado(data,modo,metodo,ruta="/tmp/",nucleos=0):
             etiquetas=clusteringAglomerativo(data_agrupada)
             nucleos=etiquetas.max()+1
         elif(metodo=="hbdscan"):
-            clusters=HDBSCANclustering(data_agrupada)
+            etiquetas=HDBSCANclustering(data_agrupada)
+            nucleos=etiquetas.max()+1
         else:
             exit()
     code=getStructCode(etiquetas,data_nombre)
@@ -182,6 +192,8 @@ def main():
                         except Exception:
                             print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
                             exit()
+                elif(param=="hdbscan"):
+                    cluster=param
         data=getRegistros0(parser(archivo))
         procesado(data,"terminal",cluster,nucleos=nCluster)
 #main()
@@ -189,15 +201,6 @@ def main():
 def HDBSCANclustering(data):
     clusterer = hdbscan.HDBSCAN(metric='l2',min_cluster_size=2, min_samples=1)
     clusterer.fit(data)
-    _nClusters=clusterer.labels_.max()+1
-    clusters=[]
-    for i in range(_nClusters+1):
-        clusters.append([])
-    for i,j in zip(clusterer.labels_,data):
-        if (i!=-1):
-            clusters[i].append(j)
-        else:
-            clusters[_nClusters-1].append(j)
-    return clusters
+    return clusterer.labels_
 
 #mainWeb(sys.argv[1])

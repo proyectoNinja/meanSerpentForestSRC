@@ -55,6 +55,8 @@ def genParam(clusters,metodo):
     param+=" tramos validos y completos, los hemos asociado en "
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
+    if (metodo=='hdbscan'):
+        param+=" Es importante destacar que el método escogido se caracteriza por descartar"
     return param
 
 def genDescGraf(codes):
