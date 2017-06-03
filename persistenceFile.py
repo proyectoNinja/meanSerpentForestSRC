@@ -55,8 +55,6 @@ def genParam(clusters,metodo):
     param+=" tramos validos y completos, los hemos asociado en "
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
-    if (metodo=='hdbscan'):
-        param+=" Es importante destacar que el método escogido se caracteriza por descartar"
     return param
 
 def genDescGraf(codes):
@@ -175,7 +173,6 @@ def genTabla(clusters,pdf):
 
 def saveData(ruta,etiquetas,nombres,datos):
     nCarpetas=etiquetas.max()
-
     for i in range(nCarpetas+1):
         os.mkdir(ruta+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):

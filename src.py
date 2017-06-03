@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import os
 from datetime import datetime,timedelta
 from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
@@ -130,7 +131,7 @@ def clusteringAglomerativo(datas,normalizar=True):
 def clusteringNAglomerativo(data,nCluster):
     return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
 
-def procesado(data,modo,metodo,ruta="/tmp/",nucleos=0):
+def procesado(data,modo,metodo,ruta="./",nucleos=0):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_nombre=[]
@@ -144,7 +145,7 @@ def procesado(data,modo,metodo,ruta="/tmp/",nucleos=0):
         if (metodo=="kmeans"):
             etiquetas=KMeans(n_clusters=nucleos, random_state=10).fit_predict(data_norm)
         elif(metodo=="aglomerative"):
-            etiquetas=clusteringNAglomerativo(data_agrupada,data_nombre,nucleos)
+            etiquetas=clusteringNAglomerativo(data_agrupada,nucleos)
     else:
         if (metodo=="kmeans"):
             etiquetas=KMeansClustering(data_agrupada)
@@ -171,32 +172,32 @@ def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
         print "AYUDA"
         print "El formato de entrada correspondiente para un solo csv es el siguiente"
-        print "src.py [archivo][ruta_destino][kmeans|aglomerative|hbdscan][num_clusters]"
+        print "src.py [ruta_de_archivo][kmeans|aglomerative|hbdscan][num_clusters]"
+        print "el archivo ha de llamarse csv.txt"
         print "num_clusters [2,36] solo puede ir tras KMeans o aglomerative"
         exit()
     else:
         cluster="kmeans"
         nCluster=0
-        archivo=sys.argv[1]
-        if (len(sys.argv)>2):
-            ruta=sys.argv[2]
-            if(len(sys.argv)>3):
-                param=sys.argv[3]
-                if((param=="kmeans") or (param=="aglomerative")):
-                    cluster=param
-                    if(len(sys.argv)>4):
-                        try:
-                            nCluster=int(sys.argv[4])
-                            if (nCluster>36 or nCluster<2):
-                                raise
-                        except Exception:
-                            print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
-                            exit()
-                elif(param=="hdbscan"):
-                    cluster=param
-        data=getRegistros0(parser(archivo))
-        procesado(data,"terminal",cluster,nucleos=nCluster)
-#main()
+        ruta=sys.argv[1]
+        if(len(sys.argv)>2):
+            param=sys.argv[2]
+            if((param=="kmeans") or (param=="aglomerative")):
+                cluster=param
+                if(len(sys.argv)>3):
+                    try:
+                        nCluster=int(sys.argv[3])
+                        if (nCluster>36 or nCluster<2):
+                            raise
+                    except Exception:
+                        print "Esperamos un valor numerico en [2,20] para fijar el numero de clusters"
+                        exit()
+            elif(param=="hdbscan"):
+                cluster=param
+    data=getRegistros0(parser(ruta+"csv.txt"))
+    procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)
+
+main()
 
 def HDBSCANclustering(data):
     clusterer = hdbscan.HDBSCAN(metric='l2',min_cluster_size=2, min_samples=1)
