@@ -197,11 +197,12 @@ def main():
     data=getRegistros0(parser(ruta+"csv.txt"))
     procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)
 
-main()
 
 def HDBSCANclustering(data):
     clusterer = hdbscan.HDBSCAN(metric='l2',min_cluster_size=2, min_samples=1)
     clusterer.fit(data)
     return clusterer.labels_
 
+if __name__ == "__main__":
+    main()
 #mainWeb(sys.argv[1])
