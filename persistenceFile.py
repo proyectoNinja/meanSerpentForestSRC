@@ -55,7 +55,6 @@ def genParam(clusters,metodo):
     param+=" tramos validos y completos, los hemos asociado en "
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
-    
     return param
 
 def genDescGraf(codes):
