@@ -179,6 +179,7 @@ def saveData(ruta,etiquetas,nombres,datos):
         np.savetxt(ruta+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
 
 def toPDF(clusters,codes,metodo,ruta=""):
+    route="/home/tfg/main/meanSerpentForestSRC/"
     pdf=FPDF('P','mm','A4')
     pdf.add_page()
     titulo="Informe glucemico"
@@ -188,13 +189,13 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.cell(w,9,titulo,0,1,'C',0)
     pdf.ln()
     pdf.set_font('Times','',12)
-    with open(ruta+'Introduccion', 'rb') as fh:
+    with open(route+'Introduccion', 'rb') as fh:
             intro = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,intro)
     pdf.ln()
     param=genParam(clusters,metodo)
     pdf.multi_cell(0,5,param)
-    with open(ruta+'explica', 'rb') as fh:
+    with open(route+'explica', 'rb') as fh:
             pos = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,pos)
     getPlotAndSave(clusters,ruta)
@@ -206,7 +207,7 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.ln()
     pdf=genTabla(clusters,pdf)
     pdf.add_page()
-    with open(ruta+'responsabilidad', 'rb') as fh:
+    with open(route+'responsabilidad', 'rb') as fh:
             res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
     pdf.output(ruta+'informe.pdf','F')
