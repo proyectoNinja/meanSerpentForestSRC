@@ -188,13 +188,13 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.cell(w,9,titulo,0,1,'C',0)
     pdf.ln()
     pdf.set_font('Times','',12)
-    with open('Introduccion', 'rb') as fh:
+    with open(ruta+'Introduccion', 'rb') as fh:
             intro = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,intro)
     pdf.ln()
     param=genParam(clusters,metodo)
     pdf.multi_cell(0,5,param)
-    with open('explica', 'rb') as fh:
+    with open(ruta+'explica', 'rb') as fh:
             pos = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,pos)
     getPlotAndSave(clusters,ruta)
@@ -206,7 +206,7 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.ln()
     pdf=genTabla(clusters,pdf)
     pdf.add_page()
-    with open('responsabilidad', 'rb') as fh:
+    with open(ruta+'responsabilidad', 'rb') as fh:
             res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
     pdf.output(ruta+'informe.pdf','F')
