@@ -58,6 +58,8 @@ def genParam(clusters,metodo):
     param+=" tramos validos y completos, los hemos asociado en "
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
+    if (metodo=='hdbscan'):
+        param+=" Notese que el último de los clusters correspodiente al ruido, es decir, no compomone un cluster en si mismo."
     return param
 
 def genDescGraf(codes):
@@ -115,6 +117,7 @@ def getInfo(clusters):
             sumaDeMaximos+=group.max()
             sumaDeMinimos+=group.min()
             nSegmentos+=1
+            sumaDeEventosMalosGrupo=0
             for registro in group:
                 n+=1
                 if (registro>=70 and registro<=180):
@@ -125,10 +128,10 @@ def getInfo(clusters):
                 elif (registro>=240):
                     sumaDeEventosAltos+=1
                     sumaDeEventosMalosGrupo+=1
-        if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
-            nMaxDeEventosMalos=sumaDeEventosMalosGrupo
-        elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
-            nMinDeEventosMalos=sumaDeEventosMalosGrupo
+            if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
+                nMaxDeEventosMalos=sumaDeEventosMalosGrupo
+            elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
+                nMinDeEventosMalos=sumaDeEventosMalosGrupo
         datos[i][0]=sumaDeMedias/nSegmentos #media
         datos[i][2]=sumaDeMaximos/nSegmentos #media de maximos
         datos[i][3]=sumaDeMinimos/nSegmentos #media de minimos
