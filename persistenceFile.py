@@ -175,7 +175,7 @@ def genTabla(clusters,pdf):
     return pdf
 
 def saveData(ruta,etiquetas,nombres,datos):
-    nCarpetas=etiquetas.max()
+    nCarpetas=max(etiquetas)
     for i in range(nCarpetas+1):
         os.mkdir(ruta+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):

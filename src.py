@@ -58,7 +58,7 @@ def parser(dir,desplazamiento=0):
     return data
 
 def getStructCode(labels,nombre):
-    nClusters=labels.max()+1
+    nClusters=max(labels)+1
     code=[]
     for j in range(nClusters):
         code.append([])
@@ -70,7 +70,7 @@ def getStructCode(labels,nombre):
 
 def getStructCluster(labels, data):
     clusters=[]
-    numero=labels.max()+1
+    numero=max(labels)+1
     for i in range(numero):
         clusters.append([])
     for i,j in zip(labels,data):
@@ -150,9 +150,9 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0):
             eti=[]
             for et in etiquetas:
                 if (et==-1):
-                    eti=nucleos
+                    eti.append(nucleos)
                 else:
-                    eti=et
+                    eti.append(et)
             nucleos+=1
             etiquetas=eti
         else:
