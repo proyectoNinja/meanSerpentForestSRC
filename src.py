@@ -156,6 +156,10 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0):
         elif(metodo=="hdbscan"):
             etiquetas=HDBSCANclustering(data_agrupada)
             nucleos=etiquetas.max()+1
+            for et in etiquetas:
+                if (et==-1):
+                    et=nucleos
+            nucleos+=1
         else:
             exit()
     code=getStructCode(etiquetas,data_nombre)
@@ -172,7 +176,7 @@ def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
         print "AYUDA"
         print "El formato de entrada correspondiente para un solo csv es el siguiente"
-        print "src.py [ruta_de_archivo][kmeans|aglomerative|hbdscan][num_clusters]"
+        print "src.py [ruta_de_archivo][kmeans|aglomerative|hdbscan][num_clusters]"
         print "el archivo ha de llamarse csv.txt"
         print "num_clusters [2,36] solo puede ir tras KMeans o aglomerative"
         exit()
