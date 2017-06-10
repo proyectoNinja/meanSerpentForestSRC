@@ -153,7 +153,7 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0):
         elif(metodo=="aglomerative"):
             etiquetas=clusteringAglomerativo(data_agrupada)
             nucleos=etiquetas.max()+1
-        elif(metodo=="hbdscan"):
+        elif(metodo=="hdbscan"):
             etiquetas=HDBSCANclustering(data_agrupada)
             nucleos=etiquetas.max()+1
         else:
