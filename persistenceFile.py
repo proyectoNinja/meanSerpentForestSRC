@@ -125,10 +125,10 @@ def getInfo(clusters):
                 elif (registro>=240):
                     sumaDeEventosAltos+=1
                     sumaDeEventosMalosGrupo+=1
-            if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
-                nMaxDeEventosMalos=sumaDeEventosMalosGrupo
-            elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
-                nMinDeEventosMalos=sumaDeEventosMalosGrupo
+        if(sumaDeEventosMalosGrupo>nMaxDeEventosMalos):
+            nMaxDeEventosMalos=sumaDeEventosMalosGrupo
+        elif(sumaDeEventosMalosGrupo<nMinDeEventosMalos):
+            nMinDeEventosMalos=sumaDeEventosMalosGrupo
         datos[i][0]=sumaDeMedias/nSegmentos #media
         datos[i][2]=sumaDeMaximos/nSegmentos #media de maximos
         datos[i][3]=sumaDeMinimos/nSegmentos #media de minimos
