@@ -68,22 +68,13 @@ def getStructCode(labels,nombre):
         code[grupo][name%10]+=1
     return code
 
-def getStructCluster(labels, data,mode='kmeans'):
+def getStructCluster(labels, data):
     clusters=[]
     numero=labels.max()+1
-    if (mode=='hdbscan'):
-        for i in range(_nClusters+1):
-            clusters.append([])
-        for i,j in zip(clusterer.labels_,data):
-            if (i!=-1):
-                clusters[i].append(j)
-            else:
-                clusters[_nClusters-1].append(j)
-    else:
-        for i in range(numero):
-            clusters.append([])
-        for i,j in zip(labels,data):
-            clusters[i].append(j)
+    for i in range(numero):
+        clusters.append([])
+    for i,j in zip(labels,data):
+        clusters[i].append(j)
     return clusters
 
 def KMeansNClustering(datas,nombre,n_clusters):
@@ -156,16 +147,21 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0):
         elif(metodo=="hdbscan"):
             etiquetas=HDBSCANclustering(data_agrupada)
             nucleos=etiquetas.max()+1
+            eti=[]
             for et in etiquetas:
                 if (et==-1):
-                    et=nucleos
+                    eti=nucleos
+                else:
+                    eti=et
             nucleos+=1
+            etiquetas=eti
         else:
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
     if (modo=="web"):
         persistenceFile.toPDF(clusters,code,metodo,ruta)
+    persistenceFile.getPlotAndSave(clusters,ruta)
     persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada)
 
 def mainWeb(rutas,metodo="kmeans",nucleos=0):
