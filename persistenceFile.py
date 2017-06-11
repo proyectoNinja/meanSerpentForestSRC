@@ -7,6 +7,7 @@ import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import zipfile
 
 nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Glucosa minima media','Porcentaje de tiempo en rango 70-180',
@@ -59,7 +60,7 @@ def genParam(clusters,metodo):
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
     if (metodo=='hdbscan'):
-        param+=" Notese que el último de los clusters correspodiente al ruido, es decir, no compomone un cluster en si mismo."
+        param+=" Notese que el ultimo de los clusters correspodiente al ruido, es decir, no compomone un cluster en si mismo."
     return param
 
 def genDescGraf(codes):
@@ -179,10 +180,16 @@ def genTabla(clusters,pdf):
 
 def saveData(ruta,etiquetas,nombres,datos):
     nCarpetas=max(etiquetas)
+    os.mkdir("clusters")
     for i in range(nCarpetas+1):
-        os.mkdir(ruta+str(i))
+        os.mkdir(ruta+'clusters/'+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):
-        np.savetxt(ruta+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
+        np.savetxt(ruta+'clusters/'+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
+    fantasy_zip = zipfile.ZipFile('ruta+archivo.zip ', 'w')
+    for folder, subfolders, files in os.walk('ruta'):
+        for file in files:
+            fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file),'ruta'+clusters), compress_type = zipfile.ZIP_DEFLATED)
+    fantasy_zip.close()
 
 def toPDF(clusters,codes,metodo,ruta=""):
     route="/home/tfg/main/meanSerpentForestSRC/"
