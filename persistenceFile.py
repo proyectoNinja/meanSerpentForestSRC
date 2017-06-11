@@ -188,7 +188,7 @@ def saveData(ruta,etiquetas,nombres,datos):
     fantasy_zip = zipfile.ZipFile(ruta+'archivo.zip ', 'w')
     for root, dirs, files in os.walk(ruta+'clusters/'):
         for file in files:
-            fantasy_zip.write(os.path.join(ruta+'clusters/', file))
+            fantasy_zip.write(os.path.join(root, file))
     fantasy_zip.close()
 
 def toPDF(clusters,codes,metodo,ruta=""):
