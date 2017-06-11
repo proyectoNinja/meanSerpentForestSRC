@@ -180,15 +180,15 @@ def genTabla(clusters,pdf):
 
 def saveData(ruta,etiquetas,nombres,datos):
     nCarpetas=max(etiquetas)
-    os.mkdir("clusters")
+    os.mkdir(ruta+"clusters")
     for i in range(nCarpetas+1):
         os.mkdir(ruta+'clusters/'+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):
         np.savetxt(ruta+'clusters/'+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
-    fantasy_zip = zipfile.ZipFile('ruta+archivo.zip ', 'w')
-    for folder, subfolders, files in os.walk('ruta'):
+    fantasy_zip = zipfile.ZipFile(ruta+'archivo.zip ', 'w')
+    for root, dirs, files in os.walk(ruta+'clusters/'):
         for file in files:
-            fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file),'ruta'+clusters), compress_type = zipfile.ZIP_DEFLATED)
+            fantasy_zip.write(os.path.join(ruta+'clusters/', file))
     fantasy_zip.close()
 
 def toPDF(clusters,codes,metodo,ruta=""):
