@@ -44,6 +44,24 @@ def getPlotAndSave(clusters,ruta):
     #plt.show()
     #return plt
 
+def genTablaOrigin(code,pdf):
+    pdf.cell(10,5,'','LTBR',0,'C',0)
+    pdf.cell(20,5,'00-04',1,0,'C',0)
+    pdf.cell(20,5,'04-08',1,0,'C',0)
+    pdf.cell(20,5,'08-12',1,0,'C',0)
+    pdf.cell(20,5,'12-16',1,0,'C',0)
+    pdf.cell(20,5,'16-20',1,0,'C',0)
+    pdf.cell(20,5,'20-24',1,0,'C',0)
+    pdf.ln()
+    n=1
+    for cluster in code:
+        pdf.cell(10,5,str(n),1,0,'C',0)
+        for tramo in cluster:
+            pdf.cell(20,5,str(tramo),1,0,'C',0)
+        n+=1
+        pdf.ln()
+    return pdf
+
 def genParam(clusters,metodo):
     n=0
     tra=0
@@ -65,7 +83,6 @@ def genParam(clusters,metodo):
 
 def genDescGraf(codes):
     frase=""
-    letra='a'
     for cluster,nCluster in zip(codes,range(len(codes))):
         frase+="El cluster numero "+ str(nCluster+1)+" esta formado por "
         salto=False
@@ -218,7 +235,8 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.ln()
     pdf.ln()
     pdf.ln()
-    pdf=genTabla(clusters,pdf)
+    pdf=genTablaOrigin(codes,pdf)
+    #pdf=genTabla(clusters,pdf)
     pdf.add_page()
     with open(route+'responsabilidad', 'rb') as fh:
             res = fh.read().decode('utf-8')
