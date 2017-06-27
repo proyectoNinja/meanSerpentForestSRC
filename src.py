@@ -166,7 +166,7 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0,nombreArchivo=""):
 
 def mainWeb(rutas,metodo="kmeans",nucleos=0,nombreArchivo=""):
     data=getRegistros0(parser(rutas+"csv.txt"))
-    procesado(data,"web",metodo,ruta=rutas,nucleos=nucleos,nombreArchivo=nombreArchivo)
+    return procesado(data,"web",metodo,ruta=rutas,nucleos=nucleos,nombreArchivo=nombreArchivo)
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):
@@ -195,7 +195,7 @@ def main():
             elif(param=="hdbscan"):
                 cluster=param
     data=getRegistros0(parser(ruta+"csv.txt"))
-    print procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)
+    print procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)+' generated'
 
 
 def HDBSCANclustering(data):
