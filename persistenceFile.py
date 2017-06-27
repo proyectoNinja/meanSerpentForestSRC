@@ -48,19 +48,19 @@ def getPlotAndSave(clusters,ruta,metodo,nombreArchivo):
     #return plt
 
 def genTablaOrigin(code,pdf):
-    pdf.cell(10,5,'','LTBR',0,'C',0)
-    pdf.cell(20,5,'00-04',1,0,'C',0)
-    pdf.cell(20,5,'04-08',1,0,'C',0)
-    pdf.cell(20,5,'08-12',1,0,'C',0)
-    pdf.cell(20,5,'12-16',1,0,'C',0)
-    pdf.cell(20,5,'16-20',1,0,'C',0)
-    pdf.cell(20,5,'20-24',1,0,'C',0)
+    pdf.cell(10,8,'','LTBR',0,'C',0)
+    pdf.cell(28,8,'00-04',1,0,'C',0)
+    pdf.cell(28,8,'04-08',1,0,'C',0)
+    pdf.cell(28,8,'08-12',1,0,'C',0)
+    pdf.cell(28,8,'12-16',1,0,'C',0)
+    pdf.cell(28,8,'16-20',1,0,'C',0)
+    pdf.cell(28,8,'20-24',1,0,'C',0)
     pdf.ln()
     n=1
     for cluster in code:
-        pdf.cell(10,5,str(n),1,0,'C',0)
+        pdf.cell(10,8,str(n),1,0,'C',0)
         for tramo in cluster:
-            pdf.cell(20,5,str(tramo),1,0,'C',0)
+            pdf.cell(28,8,str(tramo),1,0,'C',0)
         n+=1
         pdf.ln()
     return pdf
@@ -87,7 +87,7 @@ def genParam(clusters,metodo):
 def genDescGraf(codes):
     frase=""
     for cluster,nCluster in zip(codes,range(len(codes))):
-        frase+="El cluster número "+ str(nCluster+1)+" esta formado por "
+        frase+="El cluster numero "+ str(nCluster+1)+" esta formado por "
         salto=False
         for tramo, nTramo in zip(cluster,range(len(cluster))):
             if(tramo>0):
@@ -173,27 +173,27 @@ def getInfo(clusters):
 
 def genTabla(clusters,pdf):
     info=getInfo(clusters)
-    pdf.cell(10,5,'','LTBR',0,'C',0)
-    pdf.cell(20,5,'A',1,0,'C',0)
-    pdf.cell(20,5,'B',1,0,'C',0)
-    pdf.cell(20,5,'C',1,0,'C',0)
-    pdf.cell(20,5,'D',1,0,'C',0)
-    pdf.cell(20,5,'E',1,0,'C',0)
-    pdf.cell(20,5,'F',1,0,'C',0)
-    pdf.cell(20,5,'G',1,0,'C',0)
-    pdf.cell(20,5,'H',1,0,'C',0)
-    pdf.cell(20,5,'I',1,0,'C',0)
+    pdf.cell(10,8,'','LTBR',0,'C',0)
+    pdf.cell(20,8,'A',1,0,'C',0)
+    pdf.cell(20,8,'B',1,0,'C',0)
+    pdf.cell(20,8,'C',1,0,'C',0)
+    pdf.cell(20,8,'D',1,0,'C',0)
+    pdf.cell(20,8,'E',1,0,'C',0)
+    pdf.cell(20,8,'F',1,0,'C',0)
+    pdf.cell(20,8,'G',1,0,'C',0)
+    pdf.cell(20,8,'H',1,0,'C',0)
+    pdf.cell(20,8,'I',1,0,'C',0)
     pdf.ln()
     n=1
     for cluster in info:
-        pdf.cell(10,5,str(n),1,0,'C',0)
+        pdf.cell(10,8,str(n),1,0,'C',0)
         for dato,d in zip(cluster,range(len(cluster))):
             if (d<4 or d==5 or d==6):
-                pdf.cell(20,5,str(round(dato,2)),1,0,'C',0)
+                pdf.cell(20,8,str(round(dato,2)),1,0,'C',0)
             elif(d==4):
-                pdf.cell(20,5,str(round(dato,2))+'%',1,0,'C',0)
+                pdf.cell(20,8,str(round(dato,2))+'%',1,0,'C',0)
             elif(d>=7):
-                pdf.cell(20,5,str(int(dato)),1,0,'C',0)
+                pdf.cell(20,8,str(int(dato)),1,0,'C',0)
         n+=1
         pdf.ln()
     return pdf
@@ -216,7 +216,7 @@ def toPDF(clusters,codes,metodo,ruta="",nombreArchivo=""):
     route="/home/tfg/main/meanSerpentForestSRC/"
     pdf=FPDF('P','mm','A4')
     pdf.add_page()
-    titulo="Informe glucémico"
+    titulo="Informe sobre glucemia"
     w = len(titulo) + 6
     pdf.set_x((210 - w) / 2)
     pdf.set_font('Times','B',20)
@@ -224,12 +224,13 @@ def toPDF(clusters,codes,metodo,ruta="",nombreArchivo=""):
     pdf.ln()
     pdf.set_font('Times','',12)
     with open(route+'Introduccion', 'rb') as fh:
-            intro = fh.read().decode('utf-8')
+        intro = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,intro)
     pdf.ln()
     param=genParam(clusters,metodo)
+    pdf.multi_cell(0,5,param)
     with open(route+'explica', 'rb') as fh:
-            pos = fh.read().decode('utf-8')
+        pos = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,pos)
     getPlotAndSave(clusters,ruta,metodo,nombreArchivo)
     pdf.image(ruta+nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_img.png', 0,pdf.get_y() ,8*28)
@@ -239,9 +240,16 @@ def toPDF(clusters,codes,metodo,ruta="",nombreArchivo=""):
     pdf.ln()
     pdf.ln()
     pdf=genTablaOrigin(codes,pdf)
+    pdf.add_page()
+    with open(route+'lista', 'rb') as fh:
+        intro = fh.read().decode('utf-8')
+    pdf.multi_cell(0,5,intro)
+    pdf.ln()
+    pdf.ln()
     pdf=genTabla(clusters,pdf)
     pdf.add_page()
     with open(route+'responsabilidad', 'rb') as fh:
-            res = fh.read().decode('utf-8')
+        res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
     pdf.output(ruta+nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf','F')
+    return nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf'

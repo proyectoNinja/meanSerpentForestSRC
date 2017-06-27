@@ -161,9 +161,8 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0,nombreArchivo=""):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
-    persistenceFile.toPDF(clusters,code,metodo,ruta,nombreArchivo)
-    #persistenceFile.getPlotAndSave(clusters,ruta,metodo,nombreArchivo)
     persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada,metodo,nombreArchivo)
+    return persistenceFile.toPDF(clusters,code,metodo,ruta,nombreArchivo)
 
 def mainWeb(rutas,metodo="kmeans",nucleos=0,nombreArchivo=""):
     data=getRegistros0(parser(rutas+"csv.txt"))

@@ -1,0 +1,11 @@
+Se han extraido de cada clúster los siguientes datos estadísticos:
+
+(A) - Glucosa Media
+(B) - Desviación típica
+(C) - Glucosa máxima media
+(D) - Glucosa mínima media
+(E) - Porcentaje de tiempo en rango 70-180
+(F) - Número medio de eventos por debajo del mínimo(60)
+(G) - Número medio de eventos por encima del máximo (240)
+(H) - Máximo número de eventos fuera de rango(60-240)
+(I) - Mínimo número de eventos fuera de rango(60-240)
