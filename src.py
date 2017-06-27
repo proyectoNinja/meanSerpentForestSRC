@@ -195,7 +195,7 @@ def main():
             elif(param=="hdbscan"):
                 cluster=param
     data=getRegistros0(parser(ruta+"csv.txt"))
-    procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)
+    print procesado(data,modo="terminal",metodo=cluster,ruta=ruta,nucleos=nCluster)
 
 
 def HDBSCANclustering(data):

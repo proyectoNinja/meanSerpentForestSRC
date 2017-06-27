@@ -252,4 +252,4 @@ def toPDF(clusters,codes,metodo,ruta="",nombreArchivo=""):
         res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
     pdf.output(ruta+nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf','F')
-    return nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf'
+    return str(nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf')
