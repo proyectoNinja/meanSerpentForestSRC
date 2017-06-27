@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import pandas as pd
 import numpy as np
 import sys
@@ -14,7 +17,6 @@ def getRegistros0(data):
     col=['Historico','Hora','Grupo']
     data=data[col]
     data=data.dropna(axis=0)
-    #data['Historico']=data['Historico'].map(lambda x:int(x))
     format="%Y/%m/%d %H:%M"
     data.set_index('Hora', inplace=True)
     return data
@@ -122,7 +124,7 @@ def clusteringAglomerativo(datas,normalizar=True):
 def clusteringNAglomerativo(data,nCluster):
     return AgglomerativeClustering(n_clusters=nCluster,affinity='manhattan',linkage='complete').fit_predict(norm().fit_transform(data))
 
-def procesado(data,modo,metodo,ruta="./",nucleos=0):
+def procesado(data,modo,metodo,ruta="./",nucleos=0,nombreArchivo=""):
     data_final=data.groupby('Grupo')
     data_agrupada=[]
     data_nombre=[]
@@ -159,14 +161,13 @@ def procesado(data,modo,metodo,ruta="./",nucleos=0):
             exit()
     code=getStructCode(etiquetas,data_nombre)
     clusters=getStructCluster(etiquetas,data_agrupada)
-    if (modo=="web"):
-        persistenceFile.toPDF(clusters,code,metodo,ruta)
-    persistenceFile.getPlotAndSave(clusters,ruta)
-    persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada)
+    persistenceFile.toPDF(clusters,code,metodo,ruta,nombreArchivo)
+    #persistenceFile.getPlotAndSave(clusters,ruta,metodo,nombreArchivo)
+    persistenceFile.saveData(ruta,etiquetas,data_nombre,data_agrupada,metodo,nombreArchivo)
 
-def mainWeb(rutas,metodo="kmeans",nucleos=0):
+def mainWeb(rutas,metodo="kmeans",nucleos=0,nombreArchivo=""):
     data=getRegistros0(parser(rutas+"csv.txt"))
-    procesado(data,"web",metodo,ruta=rutas,nucleos=nucleos)
+    procesado(data,"web",metodo,ruta=rutas,nucleos=nucleos,nombreArchivo=nombreArchivo)
 
 def main():
     if (len(sys.argv)==1 or sys.argv[1]=="help"):

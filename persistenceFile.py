@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import sys
 import math
 import os
@@ -16,7 +19,7 @@ nombreDatos= [  'Glucosa Media', 'Desviacion tipica','Glucosa maxima media',
                 'Maximo numero de eventos fuera de rango(60-240)',
                 'Minimo numero de eventos fuera de rango(60-240)']
 
-def getPlotAndSave(clusters,ruta):
+def getPlotAndSave(clusters,ruta,metodo,nombreArchivo):
     n_clusters=len(clusters)
     for i in range(n_clusters):
         for group in clusters[i]:
@@ -40,7 +43,7 @@ def getPlotAndSave(clusters,ruta):
                 plt.subplot(6,6,i+1)
             plt.plot(group)
             plt.axis([0,15,40,350])
-    plt.savefig(ruta+'img.png')
+    plt.savefig(ruta+nombreArchivo+'_'+metodo+'_'+str(n_clusters)+'_img.png')
     #plt.show()
     #return plt
 
@@ -84,7 +87,7 @@ def genParam(clusters,metodo):
 def genDescGraf(codes):
     frase=""
     for cluster,nCluster in zip(codes,range(len(codes))):
-        frase+="El cluster numero "+ str(nCluster+1)+" esta formado por "
+        frase+="El cluster número "+ str(nCluster+1)+" esta formado por "
         salto=False
         for tramo, nTramo in zip(cluster,range(len(cluster))):
             if(tramo>0):
@@ -195,24 +198,25 @@ def genTabla(clusters,pdf):
         pdf.ln()
     return pdf
 
-def saveData(ruta,etiquetas,nombres,datos):
+def saveData(ruta,etiquetas,nombres,datos,metodo,nombreArchivo=""):
     nCarpetas=max(etiquetas)
     os.mkdir(ruta+"clusters")
     for i in range(nCarpetas+1):
         os.mkdir(ruta+'clusters/'+str(i))
     for cluster,nombre,dato in zip(etiquetas,nombres,datos):
         np.savetxt(ruta+'clusters/'+str(cluster)+'/'+str(nombre),dato,fmt='%i',delimiter=" ")
-    fantasy_zip = zipfile.ZipFile(ruta+'archivo.zip ', 'w')
+    fantasy_zip = zipfile.ZipFile(ruta+nombreArchivo+'_'+metodo+'_'+str(nCarpetas+1)+'.zip ', 'w')
     for root, dirs, files in os.walk(ruta+'clusters/'):
         for file in files:
             fantasy_zip.write(os.path.join(root, file))
     fantasy_zip.close()
 
-def toPDF(clusters,codes,metodo,ruta=""):
+def toPDF(clusters,codes,metodo,ruta="",nombreArchivo=""):
+    nucleos=len(clusters)
     route="/home/tfg/main/meanSerpentForestSRC/"
     pdf=FPDF('P','mm','A4')
     pdf.add_page()
-    titulo="Informe glucemico"
+    titulo="Informe glucémico"
     w = len(titulo) + 6
     pdf.set_x((210 - w) / 2)
     pdf.set_font('Times','B',20)
@@ -224,21 +228,20 @@ def toPDF(clusters,codes,metodo,ruta=""):
     pdf.multi_cell(0,5,intro)
     pdf.ln()
     param=genParam(clusters,metodo)
-    pdf.multi_cell(0,5,param)
     with open(route+'explica', 'rb') as fh:
             pos = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,pos)
-    getPlotAndSave(clusters,ruta)
-    pdf.image(ruta+'img.png', 0,pdf.get_y() ,8*28)
+    getPlotAndSave(clusters,ruta,metodo,nombreArchivo)
+    pdf.image(ruta+nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_img.png', 0,pdf.get_y() ,8*28)
     pdf.add_page()
     pdf.multi_cell(0,5,genDescGraf(codes))
     pdf.ln()
     pdf.ln()
     pdf.ln()
     pdf=genTablaOrigin(codes,pdf)
-    #pdf=genTabla(clusters,pdf)
+    pdf=genTabla(clusters,pdf)
     pdf.add_page()
     with open(route+'responsabilidad', 'rb') as fh:
             res = fh.read().decode('utf-8')
     pdf.multi_cell(0,5,res,border=1)
-    pdf.output(ruta+'informe.pdf','F')
+    pdf.output(ruta+nombreArchivo+'_'+metodo+'_'+str(nucleos)+'_informe.pdf','F')
