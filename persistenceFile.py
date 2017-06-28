@@ -81,7 +81,7 @@ def genParam(clusters,metodo):
     param+=str(n)
     param+=" grupos, llamados clusters de ahora en adelante."
     if (metodo=='hdbscan'):
-        param+=" Notese que el ultimo de los clusters correspodiente al ruido, es decir, no compomone un cluster en si mismo."
+        param+=" Notese que el ultimo de los clusters correspodiente al ruido, es decir, no compone un cluster en si mismo."
     return param
 
 def genDescGraf(codes):
